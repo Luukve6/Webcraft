@@ -1,31 +1,31 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Webcraft – zelf je website bijhouden, zonder gedoe</title>
-  <meta name="description" content="Webcraft is een eenvoudig beheersysteem voor websites van restaurants, winkels en kleine bedrijven. Menukaart, openingstijden, vakantiemelding en pagina's zelf aanpassen, zonder WordPress en zonder onderhoud.">
-  <meta property="og:title" content="Webcraft – zelf je website bijhouden, zonder gedoe">
-  <meta property="og:description" content="Menukaart, openingstijden, vakantiemelding en pagina's zelf aanpassen. Snel, veilig en zonder onderhoud.">
+  <title>Webcraft – update your own website, without the hassle</title>
+  <meta name="description" content="Webcraft is a simple editor for the websites of restaurants, shops and small businesses. Update your menu, opening hours, notices and pages yourself – no WordPress, no maintenance.">
+  <meta property="og:title" content="Webcraft – update your own website, without the hassle">
+  <meta property="og:description" content="Update your menu, opening hours, notices and pages yourself. Fast, secure and maintenance-free.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#1A1D2E">
   <link rel="icon" href="webcraft.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <a class="skip" href="#inhoud">Naar de inhoud</a>
+  <a class="skip" href="#content">Skip to content</a>
 
   <header class="top">
     <div class="wrap bar">
-      <a class="brand" href="./" aria-label="Webcraft, naar het begin">
+      <a class="brand" href="./" aria-label="Webcraft, back to the top">
         <img src="webcraft.svg" alt="" width="36" height="36">
         <span class="wordmark">Web<span>craft</span></span>
       </a>
       <div class="top-right">
-        <nav aria-label="Hoofdmenu">
-          <a href="#wat">Wat het is</a>
-          <a href="#hoe">Hoe het werkt</a>
-          <a href="#waarom">Waarom</a>
+        <nav aria-label="Main menu">
+          <a href="#what">What it does</a>
+          <a href="#how">How it works</a>
+          <a href="#why">Why Webcraft</a>
         </nav>
         <a class="gh" href="https://github.com/Luukve6/webcraft" rel="noopener">
           <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -35,94 +35,98 @@
     </div>
   </header>
 
-  <main id="inhoud">
+  <main id="content">
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <p class="eyebrow">Websitebeheer voor ondernemers</p>
-          <h1>Je eigen website bijhouden. <span>Zonder gedoe.</span></h1>
-          <p class="lead">Webcraft is het beheerscherm achter je website. Menukaart, openingstijden, een vakantiemelding of een nieuwe pagina: je past het zelf aan en een minuut later staat het online.</p>
+          <p class="eyebrow">Website editing for small businesses</p>
+          <h1>Update your own website. <span>Without the hassle.</span></h1>
+          <p class="lead">Webcraft is the editor behind your website. Change a price on the menu, your opening hours or add a new page yourself – a minute later it’s live.</p>
           <ul class="checks">
-            <li>Geen WordPress, geen plug-ins, geen updates</li>
-            <li>Werkt op je computer, tablet en telefoon</li>
-            <li>Snel en veilig, zonder cookies of tracking</li>
+            <li>No WordPress, no plugins, no updates</li>
+            <li>Works on your computer, tablet and phone</li>
+            <li>Fast and secure, no cookies or tracking</li>
           </ul>
         </div>
 
-        <!-- Voorbeeld van het beheerscherm (geen echte klantgegevens) -->
-        <figure class="mock" aria-label="Voorbeeld van het beheerscherm van Webcraft">
+        <!-- Example of the editor (made-up restaurant, no real customer data) -->
+        <figure class="mock" aria-label="Example of the Webcraft editor: editing a dish on the menu">
           <div class="mock-side" aria-hidden="true">
             <div class="mock-logo"><img src="webcraft.svg" alt="" width="22" height="22"> Restaurant</div>
-            <span>Overzicht</span><span>Menukaart</span><span>Openingstijden</span>
-            <span class="on">Vakantie en mededeling</span><span>Pagina’s</span>
+            <span>Dashboard</span><span class="on">Menu</span><span>Menu categories</span>
+            <span>Opening hours</span><span>Pages</span>
           </div>
           <div class="mock-main">
-            <div class="mock-title">Vakantie en mededeling</div>
-            <div class="mock-field"><label>Eerste dag</label><div class="mock-input">19-11-2026</div></div>
-            <div class="mock-field"><label>Laatste dag</label><div class="mock-input">10-12-2026</div></div>
-            <p class="mock-note">De melding staat nu op de website en verdwijnt na 10 december 2026.</p>
-            <div class="mock-btn">Opslaan en online zetten</div>
+            <div class="mock-title">Chicken satay</div>
+            <div class="mock-row">
+              <div class="mock-field"><label>Number</label><div class="mock-input">42</div></div>
+              <div class="mock-field"><label>Price</label><div class="mock-input">€ 14.50</div></div>
+            </div>
+            <div class="mock-field"><label>Category on the menu</label><div class="mock-input mock-select">Chicken dishes</div></div>
+            <div class="mock-field"><label>Description</label><div class="mock-input">With peanut sauce, fried rice or noodles</div></div>
+            <div class="mock-tags" aria-hidden="true"><span>Spicy</span></div>
+            <div class="mock-btn">Save and publish</div>
           </div>
-          <figcaption>Zo ziet het beheer eruit: gewone formulieren, in gewoon Nederlands.</figcaption>
+          <figcaption>The editor: plain forms you can’t break. (The interface itself is currently in Dutch.)</figcaption>
         </figure>
       </div>
     </section>
 
-    <section id="wat" class="section">
+    <section id="what" class="section">
       <div class="wrap">
-        <h2>Wat je er zelf mee doet</h2>
-        <p class="sub">Alles wat vaak verandert, pas je zelf aan. Het ontwerp van de site blijft altijd netjes.</p>
+        <h2>What you can do yourself</h2>
+        <p class="sub">Everything that changes often, you update yourself. The design of the site always stays tidy.</p>
         <div class="cards">
           <article class="card">
-            <h3>Menukaart en producten</h3>
-            <p>Gerechten of producten toevoegen, prijzen aanpassen, categorieën in de juiste volgorde zetten.</p>
+            <h3>Menu and products</h3>
+            <p>Add dishes or products, change prices and put categories in the right order.</p>
           </article>
           <article class="card">
-            <h3>Openingstijden</h3>
-            <p>Tijden per dag, feestdagen en losse dagen dicht. De website laat vanzelf zien of je nu open bent.</p>
+            <h3>Opening hours</h3>
+            <p>Hours per day, public holidays and single closed days. The website shows by itself whether you’re open right now.</p>
           </article>
           <article class="card">
-            <h3>Vakantie en mededelingen</h3>
-            <p>Vul de datums in en de melding verschijnt drie weken vooraf vanzelf, en verdwijnt daarna weer.</p>
+            <h3>Holidays and notices</h3>
+            <p>Enter the dates and a notice appears three weeks ahead – and disappears again afterwards.</p>
           </article>
           <article class="card">
-            <h3>Pagina’s en foto’s</h3>
-            <p>Nieuwe pagina’s maken, tekst opmaken en foto’s toevoegen. Zelf kiezen wat er in het menu staat.</p>
+            <h3>Pages and photos</h3>
+            <p>Create new pages, format text and add photos. Choose yourself what appears in the menu.</p>
           </article>
           <article class="card">
             <h3>Downloads</h3>
-            <p>Een nieuwe afhaallijst of folder als PDF uploaden. Bezoekers krijgen altijd de nieuwste.</p>
+            <p>Upload a new takeaway menu or flyer as a PDF. Visitors always get the latest one.</p>
           </article>
           <article class="card">
-            <h3>Meerdere beheerders</h3>
-            <p>Iedere medewerker logt in met een eigen account. Iemand weghalen kan met één klik.</p>
+            <h3>Several editors</h3>
+            <p>Every team member logs in with their own account. Removing someone takes one click.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="hoe" class="section alt">
+    <section id="how" class="section alt">
       <div class="wrap">
-        <h2>Hoe het werkt</h2>
+        <h2>How it works</h2>
         <ol class="steps">
-          <li><strong>Inloggen</strong><span>Met één klik op “Inloggen met GitHub”, op <em>jouwsite</em>/admin.</span></li>
-          <li><strong>Aanpassen</strong><span>Vul het formulier in. Het beheer controleert of alles klopt, bijvoorbeeld een datum met een verkeerd jaartal.</span></li>
-          <li><strong>Online</strong><span>Klik op “Opslaan en online zetten”. Binnen een minuut staat het op je website.</span></li>
+          <li><strong>Log in</strong><span>One click on “Log in with GitHub”, at <em>yoursite</em>/admin.</span></li>
+          <li><strong>Edit</strong><span>Fill in the form. The editor checks your input – a date with the wrong year, or a closing time before the opening time.</span></li>
+          <li><strong>Publish</strong><span>Click “Save and publish”. Within a minute it’s on your website.</span></li>
         </ol>
       </div>
     </section>
 
-    <section id="waarom" class="section">
+    <section id="why" class="section">
       <div class="wrap two">
         <div>
-          <h2>Waarom Webcraft</h2>
-          <p class="sub">Een website die gewoon blijft werken, zonder dat je er omkijken naar hebt.</p>
+          <h2>Why Webcraft</h2>
+          <p class="sub">A website that just keeps working, without you having to look after it.</p>
         </div>
         <dl class="why">
-          <div><dt>Snel</dt><dd>De website bestaat uit kant-en-klare pagina’s op een wereldwijd netwerk. Geen trage server, geen database.</dd></div>
-          <div><dt>Veilig</dt><dd>Er draait geen server of database die gehackt kan worden, zoals bij WordPress. Alleen mensen die je zelf toegang geeft, kunnen iets aanpassen.</dd></div>
-          <div><dt>Geen onderhoud</dt><dd>Geen updates, geen plug-ins die verouderen, geen beveiligingslekken om bij te houden.</dd></div>
-          <div><dt>Alles bewaard</dt><dd>Elke wijziging wordt bewaard, met wie het deed en wanneer. Een oude versie is altijd terug te halen.</dd></div>
+          <div><dt>Fast</dt><dd>Your website consists of ready-made pages on a worldwide network. No slow server, no database.</dd></div>
+          <div><dt>Secure</dt><dd>There’s no server or database to hack, unlike WordPress. Only people you give access can change anything.</dd></div>
+          <div><dt>No maintenance</dt><dd>No updates, no plugins going out of date, no security holes to keep track of.</dd></div>
+          <div><dt>Everything saved</dt><dd>Every change is kept, with who made it and when. An older version can always be brought back.</dd></div>
         </dl>
       </div>
     </section>
@@ -131,7 +135,7 @@
   <footer class="foot">
     <div class="wrap foot-bar">
       <span class="brand small"><img src="webcraft.svg" alt="" width="24" height="24"> <span class="wordmark">Web<span>craft</span></span></span>
-      <span class="muted">Websitebeheer zonder gedoe · Geen cookies, geen tracking</span>
+      <span class="muted">Website editing without the hassle · No cookies, no tracking</span>
     </div>
   </footer>
 </body>

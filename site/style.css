@@ -67,6 +67,11 @@ nav a:hover { color: var(--blue); }
 .mock-title { font-weight: 650; font-size: 1.05rem; }
 .mock-field label { display: block; font-size: .75rem; font-weight: 600; margin-bottom: 4px; }
 .mock-input { border: 1px solid #CFC7BA; border-radius: 8px; padding: 7px 10px; font-size: .85rem; background: #fff; }
+.mock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mock-select { position: relative; padding-right: 26px; }
+.mock-select::after { content: ""; position: absolute; right: 11px; top: 50%; width: 6px; height: 6px; border-right: 2px solid var(--grey); border-bottom: 2px solid var(--grey); transform: translateY(-70%) rotate(45deg); }
+.mock-tags { display: flex; gap: 6px; }
+.mock-tags span { font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #FDECEC; color: #B91C1C; }
 .mock-note { margin: 2px 0 0; background: var(--blue-light); border-radius: 8px; padding: 9px 11px; font-size: .8rem; }
 .mock-btn { background: var(--blue); color: #fff; text-align: center; border-radius: 9px; padding: 10px; font-weight: 600; font-size: .85rem; margin-top: 4px; }
 .mock figcaption { grid-column: 1 / -1; border-top: 1px solid var(--line); padding: 10px 14px; font-size: .82rem; color: var(--grey); background: #FBF9F6; }
