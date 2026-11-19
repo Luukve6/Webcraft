@@ -95,6 +95,10 @@ body.signed-in #app { display: flex; min-height: 100vh; }
 .nav a:hover, .nav-btn:hover { background: var(--side-bg-2); color: var(--side-accent); }
 .nav a.active { background: var(--accent); color: #fff; }
 .sidebar-foot { border-top: 1px solid var(--side-bg-2); padding: 8px 0; }
+.webcraft-link { display: flex; align-items: center; gap: 8px; margin: 6px 16px 4px; padding-top: 10px; border-top: 1px solid var(--side-bg-2); color: var(--side-muted); font-size: .8rem; text-decoration: none; }
+.webcraft-link strong { color: var(--side-text); font-weight: 600; }
+.webcraft-link:hover, .webcraft-link:focus-visible { color: var(--side-text); }
+.webcraft-link:hover strong { color: var(--side-accent); }
 .user { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: var(--side-muted); font-size: .9rem; }
 .user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .avatar { width: 28px; height: 28px; border-radius: 50%; }

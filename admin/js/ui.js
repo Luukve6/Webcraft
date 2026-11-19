@@ -1,6 +1,9 @@
 // Kleine hulpfuncties voor de interface: elementen maken, meldingen, dialogen.
 // Er wordt bewust geen innerHTML gebruikt met gebruikersinvoer.
 
+/** De website van Webcraft zelf (Nederlandse versie), voor de link in de zijbalk en bij Hulp. */
+export const WEBCRAFT_URL = 'https://webcraft-cus.pages.dev/nl/';
+
 /** Maakt een DOM-element: h('button', {class: 'btn', onclick}, 'Tekst') */
 export function h(tag, props = {}, ...children) {
   const el = document.createElement(tag);

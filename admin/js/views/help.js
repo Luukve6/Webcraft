@@ -1,6 +1,6 @@
 // Hulp: korte uitleg in gewone taal.
 
-import { h } from '../ui.js';
+import { h, WEBCRAFT_URL } from '../ui.js';
 
 export function helpView(ctx) {
   const repoUrl = `https://github.com/${ctx.config.repo.owner}/${ctx.config.repo.name}`;
@@ -29,6 +29,9 @@ export function helpView(ctx) {
           h('p', {}, 'Elke opslag is een "commit" in GitHub. Daar is alles terug te vinden en terug te zetten: ', h('a', { href: repoUrl + '/commits', target: '_blank', rel: 'noopener' }, 'bekijk de geschiedenis op GitHub'), '.')),
         q('Wie kan hier inloggen?',
           h('p', {}, 'Alleen mensen met een GitHub-account die schrijfrechten hebben op de repository. Anderen zien wel deze inlogpagina, maar kunnen niets lezen of wijzigen.')),
+        q('Wat is Webcraft?',
+          h('p', {}, 'Dit beheer heet Webcraft: een eenvoudig systeem om je eigen website bij te houden, zonder WordPress en zonder onderhoud. ',
+            h('a', { href: WEBCRAFT_URL, target: '_blank', rel: 'noopener' }, 'Meer over Webcraft'), '.')),
       )),
   };
 }

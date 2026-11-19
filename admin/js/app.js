@@ -1,6 +1,6 @@
 // Startpunt van de beheeromgeving: inloggen, menu, navigatie (router).
 
-import { h, clear, icon, toast, confirmDialog, fill, closeModals } from './ui.js';
+import { h, clear, icon, toast, confirmDialog, fill, closeModals, WEBCRAFT_URL } from './ui.js';
 import { GitHubClient } from './lib/github.js';
 import { loadSession, saveSession, clearSession } from './auth.js';
 import { Store } from './store.js';
@@ -186,7 +186,9 @@ class Shell {
         h('div', { class: 'user' },
           user.avatar_url ? h('img', { src: user.avatar_url, alt: '', class: 'avatar' }) : h('span', { class: 'avatar avatar-empty' }, (user.login || '?')[0].toUpperCase()),
           h('span', { class: 'user-name' }, user.name || user.login)),
-        h('button', { type: 'button', class: 'nav-btn', onclick: () => this.logout() }, icon('logout', 18), h('span', {}, 'Uitloggen'))));
+        h('button', { type: 'button', class: 'nav-btn', onclick: () => this.logout() }, icon('logout', 18), h('span', {}, 'Uitloggen')),
+        h('a', { class: 'webcraft-link', href: WEBCRAFT_URL, target: '_blank', rel: 'noopener', title: 'Over Webcraft (opent in een nieuw tabblad)' },
+          h('img', { src: 'img/webcraft.svg', alt: '', width: 18, height: 18 }), h('span', {}, 'Over ', h('strong', {}, 'Webcraft')))));
 
     const menuBtn = h('button', { type: 'button', class: 'menu-toggle', 'aria-label': 'Menu openen', 'aria-expanded': 'false', onclick: () => {
       const open = !document.body.classList.contains('nav-open');
