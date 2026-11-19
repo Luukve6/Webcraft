@@ -1,0 +1,113 @@
+/* Webcraft – productpagina. Huisstijl: Inkt, Webblauw, Papier; alleen Inter. */
+:root {
+  --ink: #1A1D2E;
+  --ink-2: #2A2E45;
+  --blue: #1D4ED8;
+  --blue-dark: #1E3A8A;
+  --blue-bright: #7AA2FF;
+  --blue-light: #E8EEFC;
+  --paper: #F7F4EF;
+  --card: #FFFFFF;
+  --line: #E4DED4;
+  --grey: #5F5A66;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font: 17px/1.6 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--blue); }
+h1, h2, h3 { line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 .5em; }
+h1 { font-size: clamp(2.1rem, 4.6vw, 3.4rem); font-weight: 650; }
+h1 span { color: var(--blue); }
+h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 650; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+.wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 16px; top: 16px; background: #fff; padding: 8px 12px; border-radius: 8px; z-index: 10; }
+.muted { color: var(--grey); }
+
+/* Bovenbalk */
+.top { background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.wordmark { font-weight: 650; font-size: 1.35rem; letter-spacing: -0.02em; }
+.wordmark span { color: var(--blue); }
+.brand.small .wordmark { font-size: 1.05rem; }
+.top-right { display: flex; align-items: center; gap: 22px; }
+.gh { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; background: var(--ink); color: #fff; text-decoration: none; font-weight: 600; font-size: .92rem; }
+.gh:hover { background: var(--blue); }
+nav { display: flex; gap: 22px; }
+nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .95rem; }
+nav a:hover { color: var(--blue); }
+
+/* Hero */
+.hero { padding: clamp(40px, 7vw, 88px) 0 clamp(48px, 7vw, 96px); }
+.hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(28px, 5vw, 64px); align-items: center; }
+.eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .78rem; font-weight: 600; color: var(--blue); margin: 0 0 14px; }
+.lead { font-size: 1.15rem; color: var(--grey); max-width: 34em; }
+.checks { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 10px; }
+.checks li { padding-left: 30px; position: relative; font-weight: 500; }
+.checks li::before { content: ""; position: absolute; left: 0; top: .32em; width: 18px; height: 18px; border-radius: 50%; background: var(--blue-light); box-shadow: inset 0 0 0 2px var(--blue); }
+.checks li::after { content: ""; position: absolute; left: 6px; top: .62em; width: 6px; height: 3px; border-left: 2px solid var(--blue); border-bottom: 2px solid var(--blue); transform: rotate(-45deg); }
+
+/* Voorbeeld van het beheer */
+.mock { margin: 0; display: grid; grid-template-columns: 150px 1fr; background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px -28px rgba(26, 29, 46, .35); }
+.mock-side { background: var(--ink); color: #C9C6D3; padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; font-size: .78rem; }
+.mock-logo { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 600; margin-bottom: 10px; }
+.mock-side span { padding: 7px 8px; border-radius: 7px; }
+.mock-side .on { background: var(--blue); color: #fff; }
+.mock-main { padding: 18px; display: grid; gap: 10px; align-content: start; }
+.mock-title { font-weight: 650; font-size: 1.05rem; }
+.mock-field label { display: block; font-size: .75rem; font-weight: 600; margin-bottom: 4px; }
+.mock-input { border: 1px solid #CFC7BA; border-radius: 8px; padding: 7px 10px; font-size: .85rem; background: #fff; }
+.mock-note { margin: 2px 0 0; background: var(--blue-light); border-radius: 8px; padding: 9px 11px; font-size: .8rem; }
+.mock-btn { background: var(--blue); color: #fff; text-align: center; border-radius: 9px; padding: 10px; font-weight: 600; font-size: .85rem; margin-top: 4px; }
+.mock figcaption { grid-column: 1 / -1; border-top: 1px solid var(--line); padding: 10px 14px; font-size: .82rem; color: var(--grey); background: #FBF9F6; }
+
+/* Secties */
+.section { padding: clamp(48px, 7vw, 88px) 0; }
+.section.alt { background: var(--ink); color: #F7F4EF; }
+.section.alt h2 { color: #fff; }
+.sub { color: var(--grey); font-size: 1.08rem; max-width: 40em; margin: 0 0 32px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+.card p { margin: 0; color: var(--grey); font-size: .97rem; }
+.card h3::before { content: ""; display: block; width: 28px; height: 4px; border-radius: 4px; background: var(--blue); margin-bottom: 14px; }
+
+.steps { list-style: none; counter-reset: s; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.steps li { counter-increment: s; background: var(--ink-2); border-radius: var(--radius); padding: 24px; display: grid; gap: 6px; }
+.steps li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--blue); color: #fff; font-weight: 650; margin-bottom: 6px; }
+.steps strong { font-size: 1.1rem; color: #fff; }
+.steps span { color: #C9C6D3; font-size: .97rem; }
+.steps em { color: var(--blue-bright); font-style: normal; }
+
+.two { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(24px, 5vw, 64px); align-items: start; }
+.why { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.why div { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.why dt { font-weight: 650; margin-bottom: 6px; }
+.why dd { margin: 0; color: var(--grey); font-size: .95rem; }
+
+.foot { border-top: 1px solid var(--line); padding: 26px 0; }
+.foot-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: .9rem; }
+
+/* Tablet en telefoon */
+@media (max-width: 900px) {
+  .hero-grid, .two { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  nav { display: none; }
+  .cards, .why { grid-template-columns: 1fr; }
+  .mock { grid-template-columns: 1fr; }
+  .mock-side { flex-direction: row; flex-wrap: wrap; }
+  .mock-logo { width: 100%; margin-bottom: 4px; }
+  .mock-side span:not(.on) { display: none; }
+}

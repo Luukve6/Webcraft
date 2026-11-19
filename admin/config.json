@@ -1,0 +1,13 @@
+{
+  "repo": {
+    "owner": "jouw-github-naam",
+    "name": "webcraft",
+    "branch": "main"
+  },
+  "auth": {
+    "oauthUrl": ""
+  },
+  "apiBase": "https://api.github.com",
+  "siteUrl": "",
+  "maxImageWidth": 2000
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Over ons",
+  "slug": "over-ons",
+  "status": "published",
+  "body": "<p>Hier vertel je wie je bent en wat je doet.</p>",
+  "description": "Wie wij zijn.",
+  "created": "2026-11-19T09:00:00.000Z",
+  "updated": "2026-11-19T09:00:00.000Z",
+  "inMenu": true,
+  "menuOrder": 1
+}

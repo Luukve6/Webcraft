@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+demo/*.cmd text eol=crlf
+demo/*.ps1 text eol=crlf
+demo/*.txt text eol=crlf
+sites/*/LEESMIJ.txt text eol=crlf

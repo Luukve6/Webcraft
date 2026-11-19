@@ -1,0 +1,50 @@
+/* Opmaak van de publieke website. Pas gerust aan of vervang door je eigen ontwerp. */
+:root {
+  --bg: #fbfaf7;
+  --text: #1f2328;
+  --muted: #5d6670;
+  --accent: #1f6f5c;
+  --line: #e4e1da;
+  --card: #ffffff;
+  --max: 760px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 18px/1.65 Georgia, "Times New Roman", serif;
+}
+a { color: var(--accent); }
+img { max-width: 100%; height: auto; border-radius: 6px; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+.site-header { border-bottom: 1px solid var(--line); background: #fff; }
+.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding-top: 18px; padding-bottom: 18px; }
+.site-title { font: 700 1.25rem/1.2 system-ui, sans-serif; color: var(--text); text-decoration: none; }
+.site-nav ul { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; padding: 0; list-style: none; font-family: system-ui, sans-serif; font-size: .95rem; }
+.site-nav a { color: var(--muted); text-decoration: none; }
+.site-nav a:hover, .site-nav a[aria-current="page"] { color: var(--accent); }
+main.wrap { padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
+h1, h2, h3, h4 { font-family: system-ui, sans-serif; line-height: 1.25; }
+h1 { font-size: 2.1rem; margin: 0 0 .6em; }
+.entry-meta { color: var(--muted); font: .9rem system-ui, sans-serif; margin: 0 0 .4em; }
+.entry-body blockquote { margin: 1.5em 0; padding: .2em 1.2em; border-left: 4px solid var(--accent); color: var(--muted); }
+.entry-body hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+.entry-body pre { overflow-x: auto; background: #f1efe9; padding: 12px; border-radius: 6px; }
+.entry-back { margin-top: 2.5em; font-family: system-ui, sans-serif; }
+.featured { margin: 0 0 1.5em; }
+.latest { margin-top: 3em; }
+.cards { display: grid; gap: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 1fr; }
+.card img { border-radius: 0; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.card-body { padding: 16px 20px; }
+.card h2 { margin: 0 0 .3em; font-size: 1.3rem; }
+.card h2 a { color: var(--text); text-decoration: none; }
+.card p { margin: 0; }
+.site-footer { border-top: 1px solid var(--line); color: var(--muted); font: .9rem system-ui, sans-serif; }
+.site-footer .wrap { padding-top: 20px; padding-bottom: 30px; }
+@media (min-width: 640px) {
+  .card.has-image { grid-template-columns: 220px 1fr; }
+  .card.has-image img { height: 100%; aspect-ratio: auto; }
+}

@@ -1,0 +1,85 @@
+// Overzicht (dashboard): welkom, tellers, snelle acties, recente wijzigingen.
+
+import { h, icon, timeAgo, statusBadge, fill } from '../ui.js';
+import { STATES } from '../publish.js';
+
+export function dashboardView(ctx) {
+  const { store, client, publisher, user } = ctx;
+  const pages = store.list('pages');
+  const posts = store.list('posts');
+  const drafts = [...pages.map((p) => ['pages', p]), ...posts.map((p) => ['posts', p])].filter(([, i]) => i.status !== 'published');
+
+  const stat = (n, label, href) => h('a', { class: 'stat', href }, h('span', { class: 'stat-n' }, String(n)), h('span', { class: 'stat-l' }, label));
+
+  const commitsList = h('ul', { class: 'activity' }, h('li', { class: 'muted' }, 'Laden…'));
+  client.listCommits(8).then((commits) => {
+    fill(commitsList, ...commits.map((c) =>
+      h('li', {},
+        h('span', { class: 'activity-msg' }, c.commit.message.split('\n')[0]),
+        h('span', { class: 'muted small' }, `${c.author?.login || c.commit.author?.name || ''} · ${timeAgo(c.commit.author?.date)}`))));
+    if (!commits.length) fill(commitsList, h('li', { class: 'muted' }, 'Nog geen wijzigingen.'));
+  }).catch(() => fill(commitsList, h('li', { class: 'muted' }, 'Kon de recente wijzigingen niet laden.')));
+
+  const pubBox = h('div', { class: 'pub-box' });
+  const renderPub = () => {
+    const st = STATES[publisher.state] || STATES.idle;
+    const run = publisher.run;
+    fill(pubBox, 
+      h('p', {}, h('span', { class: `dot dot-${st.cls}` }), ' ', h('strong', {}, st.label)),
+      run && run.html_url && run.html_url !== '#' ? h('p', { class: 'small' }, h('a', { href: run.html_url, target: '_blank', rel: 'noopener' }, 'Details bekijken op GitHub')) : null,
+      publisher.hosting === 'local'
+        ? h('p', { class: 'small muted' }, 'Je werkt op je eigen pc. Wijzigingen komen in de bestanden op deze computer (map content/) en staan pas online als je ze naar GitHub zet.')
+        : publisher.hosting === 'cloudflare'
+        ? h('p', { class: 'small muted' }, 'De website staat op Cloudflare Pages. Na elke opslag zet Cloudflare de nieuwe versie binnen een paar minuten online.')
+        : publisher.pagesEnabled === false
+        ? h('p', { class: 'small notice-warn' }, 'GitHub Pages staat nog niet aan voor deze repository. Je wijzigingen worden wel opgeslagen, maar nog niet gepubliceerd. Zie "Hulp" voor uitleg.')
+        : null,
+      ctx.siteUrl() ? h('p', {}, h('a', { class: 'btn btn-small', href: ctx.siteUrl(), target: '_blank', rel: 'noopener' }, icon('external', 16), 'Website bekijken')) : null);
+  };
+  renderPub();
+  publisher.addEventListener('change', renderPub);
+
+  const welcome = h('p', { class: 'lead' }, `Welkom${user?.name || user?.login ? ', ' + (user.name || user.login) : ''}! Wat wil je doen?`);
+  const features = ctx.features;
+  if (!features.posts) {
+    // Website zonder berichten: tegels voor pagina's en eigen collecties (bijv. een menukaart)
+    const cols = store.collections;
+    const pageTile = features.pages
+      ? h('a', { class: 'tile', href: '#/pages' }, icon('page', 26), h('span', { class: 'tile-title' }, 'Pagina’s'),
+        h('span', { class: 'tile-sub muted small' }, `${pages.length} ${pages.length === 1 ? 'pagina' : "pagina's"} · nieuwe maken`))
+      : null;
+    const el = h('div', { class: 'view' },
+      h('div', { class: 'view-header' }, h('h1', {}, 'Overzicht')),
+      welcome,
+      h('div', { class: 'tiles' }, pageTile, cols.map((c) => h('a', { class: 'tile', href: `#/c/${c.name}` },
+        icon(c.icon, 26),
+        h('span', { class: 'tile-title' }, c.label),
+        h('span', { class: 'tile-sub muted small' }, c.kind === 'folder' ? `${store.listEntries(c.name).length} ${c.labelPlural || c.label.toLowerCase()}` : (c.summaryLine || 'Aanpassen'))))),
+      h('div', { class: 'grid-2' },
+        h('section', { class: 'card' }, h('h2', {}, 'Publicatie'), pubBox),
+        h('section', { class: 'card' }, h('h2', {}, 'Recente wijzigingen'), commitsList)));
+    return { el, destroy: () => publisher.removeEventListener('change', renderPub) };
+  }
+
+  const el = h('div', { class: 'view' },
+    h('div', { class: 'view-header' }, h('h1', {}, 'Overzicht')),
+    welcome,
+    h('div', { class: 'quick' },
+      h('a', { class: 'btn btn-primary', href: '#/pages/new' }, icon('plus', 18), 'Nieuwe pagina'),
+      h('a', { class: 'btn btn-primary', href: '#/posts/new' }, icon('plus', 18), 'Nieuw bericht'),
+      h('a', { class: 'btn', href: '#/media' }, icon('image', 18), 'Foto’s uploaden')),
+    h('div', { class: 'stats' },
+      stat(pages.length, pages.length === 1 ? 'pagina' : "pagina's", '#/pages'),
+      stat(posts.length, posts.length === 1 ? 'bericht' : 'berichten', '#/posts'),
+      stat(drafts.length, drafts.length === 1 ? 'concept' : 'concepten', '#/posts'),
+      stat(store.media().length, store.media().length === 1 ? 'foto' : "foto's", '#/media')),
+    h('div', { class: 'grid-2' },
+      h('section', { class: 'card' }, h('h2', {}, 'Publicatie'), pubBox),
+      h('section', { class: 'card' }, h('h2', {}, 'Concepten'),
+        drafts.length
+          ? h('ul', { class: 'activity' }, drafts.slice(0, 6).map(([type, i]) => h('li', {}, h('a', { href: `#/${type}/edit/${encodeURIComponent(i.slug)}` }, i.title), ' ', statusBadge(i.status))))
+          : h('p', { class: 'muted' }, 'Geen concepten. Alles staat online.')),
+      h('section', { class: 'card card-span' }, h('h2', {}, 'Recente wijzigingen'), commitsList)),
+  );
+  return { el, destroy: () => publisher.removeEventListener('change', renderPub) };
+}

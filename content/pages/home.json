@@ -1,0 +1,11 @@
+{
+  "title": "Welkom",
+  "slug": "home",
+  "status": "published",
+  "body": "<p>Welkom op deze website. Deze tekst kun je aanpassen via <a href=\"/admin/\">het beheer</a>.</p><h2>Wat kun je hier doen?</h2><ul><li>Pagina&#39;s en berichten schrijven</li><li>Foto&#39;s toevoegen</li><li>Alles eerst als concept opslaan en later online zetten</li></ul>",
+  "description": "",
+  "created": "2026-11-19T09:00:00.000Z",
+  "updated": "2026-11-19T09:00:00.000Z",
+  "inMenu": true,
+  "menuOrder": 0
+}

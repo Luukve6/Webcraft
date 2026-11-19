@@ -1,0 +1,4 @@
+@echo off
+title CMS-demo
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0server.ps1"
+if errorlevel 1 pause

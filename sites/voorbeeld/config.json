@@ -1,0 +1,581 @@
+{
+  "siteName": "Restaurant De Linde",
+  "repo": {
+    "owner": "jouw-github-naam",
+    "name": "jouw-website",
+    "branch": "main"
+  },
+  "auth": {
+    "oauthUrl": ""
+  },
+  "apiBase": "https://api.github.com",
+  "siteUrl": "https://www.example.nl",
+  "hosting": "cloudflare",
+  "features": {
+    "pages": true,
+    "posts": false,
+    "media": false,
+    "settings": false
+  },
+  "cleanUrls": true,
+  "media": {
+    "dir": "public/assets/img/fotos",
+    "url": "/assets/img/fotos"
+  },
+  "pagePreviewCss": "/assets/css/style.css",
+  "collections": [
+    {
+      "name": "gerechten",
+      "label": "Menukaart",
+      "labelSingular": "gerecht",
+      "labelPlural": "gerechten",
+      "icon": "food",
+      "description": "Alle gerechten van de kaart. Klik op een gerecht om naam, prijs of omschrijving aan te passen.",
+      "folder": "content/gerechten",
+      "slug": "{nummer}-{naam}",
+      "idFields": [
+        "nummer",
+        "naam"
+      ],
+      "titleField": "naam",
+      "sortBy": [
+        "volgorde",
+        "nummer"
+      ],
+      "groupBy": {
+        "field": "categorie",
+        "label": "Categorie",
+        "labelPlural": "categorieën"
+      },
+      "columns": [
+        {
+          "field": "naam",
+          "label": "Gerecht"
+        },
+        {
+          "field": "nummer",
+          "label": "Nr."
+        },
+        {
+          "field": "omschrijving",
+          "label": "Omschrijving"
+        },
+        {
+          "field": "prijs",
+          "label": "Prijs",
+          "format": "euro",
+          "empty": "prijs volgt"
+        }
+      ],
+      "defaults": {
+        "labels": []
+      },
+      "previewUrl": "/menu",
+      "fields": [
+        {
+          "name": "naam",
+          "label": "Naam van het gerecht"
+        },
+        {
+          "name": "nummer",
+          "label": "Nummer",
+          "hint": "Zoals op de afhaallijst, bijv. 55 of K12"
+        },
+        {
+          "name": "prijs",
+          "label": "Prijs",
+          "widget": "number",
+          "euro": true,
+          "min": 0,
+          "required": false,
+          "hint": "Bijv. 17,50. Leeg laten = \"prijs volgt\"."
+        },
+        {
+          "name": "categorie",
+          "label": "Categorie op de kaart",
+          "widget": "relation",
+          "file": "content/categorieen.json",
+          "list": "categorieen",
+          "valueField": "id",
+          "labelField": "titel"
+        },
+        {
+          "name": "omschrijving",
+          "label": "Omschrijving",
+          "required": false,
+          "hint": "Bijv. 2 stokjes, of: met knoflook en uien."
+        },
+        {
+          "name": "labels",
+          "label": "Labels",
+          "widget": "select",
+          "multiple": true,
+          "required": false,
+          "options": [
+            {
+              "label": "Vega",
+              "value": "vega"
+            },
+            {
+              "label": "Pikant",
+              "value": "pikant"
+            }
+          ]
+        },
+        {
+          "name": "volgorde",
+          "label": "Plek op de kaart",
+          "widget": "number",
+          "integer": true,
+          "required": false,
+          "hint": "Kleiner getal = hoger op de kaart. Tussen 120 en 130 zet u een nieuw gerecht met 125."
+        }
+      ]
+    },
+    {
+      "name": "categorieen",
+      "label": "Menukaart-categorieën",
+      "icon": "list",
+      "description": "De categorieën van de menukaart, in de volgorde waarin ze op de kaart staan.",
+      "file": "content/categorieen.json",
+      "previewUrl": "/menu",
+      "fields": [
+        {
+          "name": "categorieen",
+          "label": "Categorieën (in volgorde van de kaart)",
+          "labelSingular": "categorie",
+          "widget": "list",
+          "summary": "{titel}",
+          "unique": "id",
+          "referencedBy": {
+            "collection": "gerechten",
+            "field": "categorie",
+            "key": "id",
+            "label": "gerechten"
+          },
+          "fields": [
+            {
+              "name": "titel",
+              "label": "Titel"
+            },
+            {
+              "name": "id",
+              "label": "Korte code",
+              "slugFrom": "titel",
+              "lockExisting": true,
+              "hint": "Vult zich vanzelf in uit de titel. Gerechten zijn via deze code aan de categorie gekoppeld, daarom kan hij later niet meer veranderen.",
+              "pattern": [
+                "^[a-z0-9-]+$",
+                "Alleen kleine letters, cijfers en streepjes."
+              ]
+            },
+            {
+              "name": "toelichting",
+              "label": "Toelichting onder de titel",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "afhaallijst",
+      "label": "Afhaallijst (PDF)",
+      "icon": "download",
+      "description": "De afhaallijst die bovenaan de menukaart te downloaden is. Kies een nieuwe PDF en klik op Opslaan: de oude lijst wordt dan vervangen.",
+      "file": "content/overig.json",
+      "previewUrl": "/menu",
+      "fields": [
+        {
+          "name": "menuPdf",
+          "label": "Afhaallijst (PDF)",
+          "widget": "file",
+          "accept": ".pdf,application/pdf",
+          "folder": "public/assets/docs",
+          "publicFolder": "assets/docs",
+          "fileName": "afhaallijst.pdf",
+          "nameField": "menuPdfNaam",
+          "maxSizeMB": 15,
+          "hint": "Kies de nieuwe afhaallijst als PDF (maximaal 15 MB). Hier ziet u de echte naam van het bestand; op de website heet het altijd afhaallijst.pdf."
+        }
+      ]
+    },
+    {
+      "name": "maandmenu",
+      "label": "Maandmenu",
+      "icon": "star",
+      "file": "content/maandmenu.json",
+      "previewUrl": "/maandmenu",
+      "fields": [
+        {
+          "name": "chickenOfTheMonth",
+          "label": "Kipgerecht van de maand",
+          "required": false
+        },
+        {
+          "name": "monthLabel",
+          "label": "Naam van de maand",
+          "required": false,
+          "hint": "Leeg laten = klopt altijd."
+        },
+        {
+          "name": "menu",
+          "label": "Maandmenu",
+          "widget": "object",
+          "fields": [
+            {
+              "name": "title",
+              "label": "Naam"
+            },
+            {
+              "name": "persons",
+              "label": "Voor hoeveel personen"
+            },
+            {
+              "name": "price",
+              "label": "Prijs",
+              "widget": "number",
+              "euro": true
+            },
+            {
+              "name": "items",
+              "label": "Gerechten",
+              "labelSingular": "gerecht",
+              "widget": "list",
+              "hint": "Een keuze schrijft u met óf, bijv. 2 tomatensoep óf 1 zak kroepoek.",
+              "field": {
+                "name": "item",
+                "label": "Gerecht"
+              }
+            },
+            {
+              "name": "note",
+              "label": "Kleine opmerking onder het menu",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "duo",
+          "label": "Duo menu",
+          "widget": "object",
+          "fields": [
+            {
+              "name": "title",
+              "label": "Naam"
+            },
+            {
+              "name": "persons",
+              "label": "Voor hoeveel personen"
+            },
+            {
+              "name": "price",
+              "label": "Prijs",
+              "widget": "number",
+              "euro": true
+            },
+            {
+              "name": "items",
+              "label": "Gerechten",
+              "labelSingular": "gerecht",
+              "widget": "list",
+              "field": {
+                "name": "item",
+                "label": "Gerecht"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "openingstijden",
+      "label": "Openingstijden",
+      "icon": "clock",
+      "file": "content/openingstijden.json",
+      "previewUrl": "/contact",
+      "fields": [
+        {
+          "name": "hours",
+          "label": "Openingstijden per dag",
+          "labelSingular": "dag",
+          "widget": "list",
+          "allowAdd": false,
+          "summary": "{label}: {open} – {close}",
+          "summaryWhen": [
+            {
+              "field": "closed",
+              "summary": "{label}: gesloten"
+            }
+          ],
+          "fields": [
+            {
+              "name": "day",
+              "widget": "hidden"
+            },
+            {
+              "name": "label",
+              "label": "Dag"
+            },
+            {
+              "name": "closed",
+              "label": "Gesloten",
+              "widget": "boolean"
+            },
+            {
+              "name": "open",
+              "label": "Open vanaf (bijv. 15:30)",
+              "required": false,
+              "requiredUnless": "closed",
+              "requiredMessage": "Vul in hoe laat u open gaat, of zet het vinkje bij Gesloten.",
+              "pattern": [
+                "^([01]\\d|2[0-3]):[0-5]\\d$",
+                "Schrijf de tijd als 15:30."
+              ]
+            },
+            {
+              "name": "close",
+              "label": "Dicht om (bijv. 20:00)",
+              "required": false,
+              "requiredUnless": "closed",
+              "requiredMessage": "Vul in hoe laat u dicht gaat, of zet het vinkje bij Gesloten.",
+              "after": "open",
+              "orderMessage": "Dicht om moet later zijn dan open vanaf.",
+              "pattern": [
+                "^([01]\\d|2[0-3]):[0-5]\\d$",
+                "Schrijf de tijd als 20:00."
+              ]
+            },
+            {
+              "name": "note",
+              "widget": "hidden"
+            }
+          ]
+        },
+        {
+          "name": "weekdayNote",
+          "label": "Tekst onder de openingstijden",
+          "required": false
+        },
+        {
+          "name": "holidayHours",
+          "label": "Tijden op feestdagen",
+          "widget": "object",
+          "fields": [
+            {
+              "name": "open",
+              "label": "Open vanaf",
+              "pattern": [
+                "^([01]\\d|2[0-3]):[0-5]\\d$",
+                "Schrijf de tijd als 12:00."
+              ]
+            },
+            {
+              "name": "close",
+              "label": "Dicht om",
+              "after": "open",
+              "orderMessage": "Dicht om moet later zijn dan open vanaf.",
+              "pattern": [
+                "^([01]\\d|2[0-3]):[0-5]\\d$",
+                "Schrijf de tijd als 20:00."
+              ]
+            }
+          ]
+        },
+        {
+          "name": "holidays",
+          "label": "Feestdagen waarop u open bent",
+          "labelSingular": "datum",
+          "widget": "list",
+          "required": false,
+          "unique": true,
+          "field": {
+            "name": "datum",
+            "label": "Datum",
+            "widget": "date"
+          }
+        },
+        {
+          "name": "closedDates",
+          "label": "Losse dagen dicht",
+          "labelSingular": "datum",
+          "widget": "list",
+          "required": false,
+          "unique": true,
+          "field": {
+            "name": "datum",
+            "label": "Datum",
+            "widget": "date"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vakantie",
+      "label": "Vakantie en mededeling",
+      "icon": "sun",
+      "file": "content/vakantie.json",
+      "previewUrl": "/",
+      "fields": [
+        {
+          "name": "vacation",
+          "label": "Vakantie",
+          "widget": "object",
+          "dateWindow": {
+            "from": "from",
+            "to": "to",
+            "showDaysBefore": 21,
+            "noun": "vakantiemelding"
+          },
+          "hint": "Eerste en laatste dag dat u dicht bent. Drie weken vooraf verschijnt vanzelf een melding op de website; na de laatste dag verdwijnt hij weer. Niet dicht? Laat beide leeg.",
+          "fields": [
+            {
+              "name": "from",
+              "label": "Eerste dag",
+              "widget": "date",
+              "required": false,
+              "requiredWith": "to",
+              "requiredMessage": "Vul ook de eerste dag in (of maak beide datums leeg)."
+            },
+            {
+              "name": "to",
+              "label": "Laatste dag",
+              "widget": "date",
+              "required": false,
+              "requiredWith": "from",
+              "requiredMessage": "Vul ook de laatste dag in (of maak beide datums leeg).",
+              "notBefore": "from",
+              "orderMessage": "De laatste dag ligt vóór de eerste dag. Kijk het jaartal na."
+            }
+          ]
+        },
+        {
+          "name": "notice",
+          "label": "Mededeling of reden van sluiting",
+          "required": false,
+          "hint": "Met datums hierboven: de reden van sluiting, bijv. Koningsdag. Op de website staat dan: Wij zijn gesloten vanwege: Koningsdag (leeg = vakantie). Zonder datums: deze tekst staat zoals hij is in de roze balk bovenaan. Leeg = geen balk."
+        }
+      ]
+    },
+    {
+      "name": "buffet",
+      "label": "Weekendbuffet",
+      "icon": "calendar",
+      "file": "content/buffet.json",
+      "previewUrl": "/buffet",
+      "fields": [
+        {
+          "name": "title",
+          "label": "Naam"
+        },
+        {
+          "name": "days",
+          "label": "Dagen"
+        },
+        {
+          "name": "time",
+          "label": "Tijd"
+        },
+        {
+          "name": "duration",
+          "label": "Duur"
+        },
+        {
+          "name": "price",
+          "label": "Prijs per persoon",
+          "widget": "number",
+          "euro": true
+        },
+        {
+          "name": "priceNote",
+          "label": "Tekst bij de prijs"
+        },
+        {
+          "name": "kidsNote",
+          "label": "Kinderprijs",
+          "required": false
+        },
+        {
+          "name": "choice",
+          "label": "Keuze",
+          "required": false
+        },
+        {
+          "name": "reserve",
+          "label": "Reserveren",
+          "required": false
+        },
+        {
+          "name": "dishes",
+          "label": "Gerechten op het buffet",
+          "labelSingular": "gerecht",
+          "widget": "list",
+          "field": {
+            "name": "gerecht",
+            "label": "Gerecht"
+          }
+        }
+      ]
+    },
+    {
+      "name": "catering",
+      "label": "Catering",
+      "icon": "truck",
+      "file": "content/catering.json",
+      "previewUrl": "/catering",
+      "fields": [
+        {
+          "name": "pickupFrom",
+          "label": "Afhalen vanaf (personen)",
+          "widget": "number",
+          "integer": true
+        },
+        {
+          "name": "deliveryFrom",
+          "label": "Bezorgen vanaf (personen)",
+          "widget": "number",
+          "integer": true
+        },
+        {
+          "name": "notes",
+          "label": "Afspraken",
+          "labelSingular": "afspraak",
+          "widget": "list",
+          "field": {
+            "name": "afspraak",
+            "label": "Afspraak"
+          }
+        },
+        {
+          "name": "menus",
+          "label": "Cateringmenu's",
+          "labelSingular": "menu",
+          "widget": "list",
+          "summary": "{title}",
+          "fields": [
+            {
+              "name": "title",
+              "label": "Naam"
+            },
+            {
+              "name": "price",
+              "label": "Prijs per persoon",
+              "widget": "number",
+              "euro": true
+            },
+            {
+              "name": "items",
+              "label": "Gerechten",
+              "labelSingular": "gerecht",
+              "widget": "list",
+              "field": {
+                "name": "item",
+                "label": "Gerecht"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

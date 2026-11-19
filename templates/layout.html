@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{pageTitle}}</title>
+  <meta name="description" content="{{description}}">
+  <meta name="generator" content="webcraft">
+  <link rel="stylesheet" href="{{basePath}}/assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="site-title" href="{{basePath}}/">{{site.title}}</a>
+      <nav class="site-nav" aria-label="Hoofdmenu">{{{menu}}}</nav>
+    </div>
+  </header>
+  <main class="wrap">
+{{{main}}}
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>{{footer}}</p>
+    </div>
+  </footer>
+</body>
+</html>

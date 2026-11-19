@@ -1,0 +1,10 @@
+{
+  "title": "Mijn website",
+  "description": "Een website die je zelf bijhoudt via /admin.",
+  "url": "",
+  "homepage": "home",
+  "showBlogInMenu": true,
+  "blogTitle": "Nieuws",
+  "postsOnHome": 3,
+  "footer": ""
+}

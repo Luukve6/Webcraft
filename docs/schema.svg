@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" font-family="Segoe UI, Arial, sans-serif" font-size="14">
+  <title>Werking van webcraft</title>
+  <rect width="860" height="300" fill="#ffffff"/>
+  <defs>
+    <marker id="pijl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1d2327"/>
+    </marker>
+  </defs>
+  <!-- Browser -->
+  <rect x="20" y="40" width="200" height="110" rx="10" fill="#e9f2fa" stroke="#2271b1" stroke-width="2"/>
+  <text x="120" y="70" text-anchor="middle" font-weight="700">Beheer /admin</text>
+  <text x="120" y="94" text-anchor="middle">in jouw browser</text>
+  <text x="120" y="118" text-anchor="middle" font-size="12" fill="#646970">toegangssleutel blijft</text>
+  <text x="120" y="134" text-anchor="middle" font-size="12" fill="#646970">alleen in de browser</text>
+  <!-- GitHub repo -->
+  <rect x="330" y="40" width="200" height="110" rx="10" fill="#f6f7f7" stroke="#1d2327" stroke-width="2"/>
+  <text x="430" y="70" text-anchor="middle" font-weight="700">GitHub-repository</text>
+  <text x="430" y="94" text-anchor="middle">content/, media/</text>
+  <text x="430" y="118" text-anchor="middle" font-size="12" fill="#646970">elke opslag = 1 commit</text>
+  <!-- Actions -->
+  <rect x="640" y="40" width="200" height="110" rx="10" fill="#edfaef" stroke="#00a32a" stroke-width="2"/>
+  <text x="740" y="70" text-anchor="middle" font-weight="700">GitHub Actions</text>
+  <text x="740" y="94" text-anchor="middle">testen + website maken</text>
+  <text x="740" y="118" text-anchor="middle" font-size="12" fill="#646970">npm test, npm run build</text>
+  <!-- Pages -->
+  <rect x="640" y="200" width="200" height="70" rx="10" fill="#fcf9e8" stroke="#dba617" stroke-width="2"/>
+  <text x="740" y="230" text-anchor="middle" font-weight="700">GitHub Pages</text>
+  <text x="740" y="252" text-anchor="middle" font-size="12">de openbare website</text>
+  <!-- Worker -->
+  <rect x="20" y="200" width="200" height="70" rx="10" fill="#fff" stroke="#8c8f94" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="120" y="228" text-anchor="middle" font-weight="700">Cloudflare Worker</text>
+  <text x="120" y="250" text-anchor="middle" font-size="12">optioneel: Inloggen met GitHub</text>
+  <!-- Pijlen -->
+  <line x1="220" y1="95" x2="326" y2="95" stroke="#1d2327" stroke-width="2" marker-end="url(#pijl)"/>
+  <text x="273" y="85" text-anchor="middle" font-size="12">GitHub API</text>
+  <line x1="530" y1="95" x2="636" y2="95" stroke="#1d2327" stroke-width="2" marker-end="url(#pijl)"/>
+  <text x="583" y="85" text-anchor="middle" font-size="12">push</text>
+  <line x1="740" y1="150" x2="740" y2="196" stroke="#1d2327" stroke-width="2" marker-end="url(#pijl)"/>
+  <text x="752" y="178" font-size="12">publiceren</text>
+  <line x1="120" y1="196" x2="120" y2="154" stroke="#8c8f94" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#pijl)"/>
+  <text x="132" y="178" font-size="12" fill="#646970">token</text>
+</svg>

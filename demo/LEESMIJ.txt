@@ -1,0 +1,35 @@
+CMS-demo - uitproberen zonder iets te installeren
+==================================================
+
+Starten
+1. Pak de zip helemaal uit (rechtermuisknop > Alles uitpakken).
+   Dubbelklikken in de zip zelf werkt niet.
+2. Dubbelklik in de uitgepakte map op Start-demo.cmd.
+   Krijg je "Windows heeft uw pc beschermd"? Klik op "Meer informatie"
+   en dan op "Toch uitvoeren".
+3. Er opent een zwart venster en daarna je browser op het beheer.
+   Klik op "Inloggen als testgebruiker".
+4. Laat het zwarte venster open. Sluit het als je klaar bent.
+
+Wat je kunt testen
+- Pagina's en berichten maken, aanpassen, verwijderen
+- Concept opslaan of "Opslaan en online zetten"
+- Foto's uploaden en in een tekst zetten
+- Instellingen (naam van de website enz.)
+- Het statuslampje bovenin ("Website wordt bijgewerkt..." > "Staat online")
+
+Goed om te weten
+- Dit is een demo: er gaat niets naar GitHub of internet. GitHub wordt
+  in je browser nagebootst.
+- Je wijzigingen blijven bewaard in deze browser, ook na verversen.
+  Opnieuw beginnen: uitloggen en op het inlogscherm
+  "Demo opnieuw beginnen" kiezen.
+- "Website bekijken" toont de voorbeeldwebsite zoals hij in de zip zit.
+  Je wijzigingen zie je daar niet terug: in het echt maakt GitHub of
+  Cloudflare na elke opslag de website opnieuw. Gebruik in de demo de
+  knop "Voorbeeld" in de editor.
+
+Werkt het niet?
+- Blokkeert je werk-pc PowerShell of het startbestand, dan kan de demo
+  daar niet draaien. Probeer het op een andere computer, of gebruik
+  straks gewoon de echte site (jouwsite/admin), die werkt overal.
