@@ -181,7 +181,7 @@ class Shell {
     this.ctx.store.addEventListener('change', () => { brandName.textContent = siteName(); });
     this.sidebar = h('aside', { class: 'sidebar' },
       // "logo" in config.json: logo van de site in het vierkantje (anders de eerste letter van de naam)
-      h('div', { class: 'brand' }, h('span', { class: 'brand-logo', 'aria-hidden': 'true' },
+      h('div', { class: 'brand' }, h('span', { class: config.logo ? 'brand-logo has-logo' : 'brand-logo', 'aria-hidden': 'true' },
         config.logo ? h('img', { src: config.logo, alt: '', width: 24, height: 24 }) : siteName()[0].toUpperCase()), brandName),
       this.nav,
       h('div', { class: 'sidebar-foot' },
