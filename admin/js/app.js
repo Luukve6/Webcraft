@@ -122,8 +122,8 @@ function navItems(config) {
   const f = config.features;
   return [
     ['#/', 'Overzicht', 'dashboard'],
+    f.pages ? ['#/pages', 'Pagina’s', 'page'] : null, // altijd bovenaan, direct onder Overzicht
     ...config.collections.map((c) => [`#/c/${c.name}`, c.label, c.icon]),
-    f.pages ? ['#/pages', 'Pagina’s', 'page'] : null,
     f.posts ? ['#/posts', 'Berichten', 'post'] : null,
     f.media ? ['#/media', 'Foto’s', 'image'] : null,
     f.settings ? ['#/settings', 'Instellingen', 'settings'] : null,
