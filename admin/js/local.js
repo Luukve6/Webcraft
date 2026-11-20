@@ -61,11 +61,17 @@ export async function localFetch(config) {
     onChange: async (files) => {
       const body = diffFiles(last, files);
       if (!Object.keys(body.schrijf).length && !body.verwijder.length) return;
-      const r = await fetch(`${api}/opslaan`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      let r;
+      try {
+        r = await fetch(`${api}/opslaan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } catch {
+        // Geen verbinding: meestal is de lokale webserver gestopt (venster dicht, pc herstart)
+        throw new Error('de lokale webserver draait niet (meer). Start hem opnieuw met "python tools/serve.py", ververs deze pagina en probeer het nog eens. Er is niets opgeslagen.');
+      }
       if (!r.ok) throw new Error(`Opslaan op deze pc mislukt: ${(await r.text()) || r.status}`);
       last = new Map(files);
     },
