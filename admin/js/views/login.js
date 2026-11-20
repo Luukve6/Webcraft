@@ -1,6 +1,6 @@
 // Inlogscherm.
 
-import { h } from '../ui.js';
+import { h, WEBCRAFT_URL } from '../ui.js';
 import { loginWithOAuth } from '../auth.js';
 
 /**
@@ -109,7 +109,9 @@ export function loginView({ config, onToken, error }) {
       h('div', { class: 'login-below small' },
         howto,
         h('p', { class: 'muted' }, 'Vink "Ingelogd blijven" alleen aan op je eigen computer.'),
-        h('p', {}, h('a', { href: '../' }, '← Terug naar de website')))),
+        h('p', {}, h('a', { href: '../' }, '← Terug naar de website')),
+        h('a', { class: 'login-webcraft', href: WEBCRAFT_URL, target: '_blank', rel: 'noopener', title: 'Over Webcraft (opent in een nieuw tabblad)' },
+          h('img', { src: 'img/webcraft.svg', alt: '', width: 16, height: 16 }), 'Over Webcraft'))),
   };
 }
 
