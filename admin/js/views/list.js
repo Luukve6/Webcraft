@@ -1,6 +1,6 @@
 // Overzicht van alle pagina's of berichten.
 
-import { h, clear, icon, toast, confirmDialog, statusBadge, timeAgo, dragHandle, makeSortable, moveInArray } from '../ui.js';
+import { h, clear, icon, toast, confirmDialog, statusBadge, timeAgo, dragHandle, makeSortable, moveInArray, createDelayedSaver } from '../ui.js';
 import { TYPES, formatDateNl } from '../lib/content.js';
 import { pagePath } from '../lib/paths.js';
 
@@ -15,28 +15,45 @@ export function listView(ctx, type) {
   const thead = h('thead');
   // Pagina's: de volgorde in het menu verander je door te slepen (alleen bij "Alles" en zonder zoeken)
   let sortable = false;
-  let busy = false;
   let shown = [];
   const orderHint = type === 'pages' ? h('p', { class: 'muted small order-hint' }) : null;
 
-  async function reorder(from, to, keyboard) {
-    const ordered = moveInArray(shown, from, to);
-    const changed = ordered.map((item, i) => ({ item, order: (i + 1) * 10 })).filter((x) => x.item.menuOrder !== x.order).map((x) => ({ ...x.item, menuOrder: x.order }));
-    const slug = ordered[to].slug;
-    if (!changed.length) { render(); return; }
-    busy = true; ctx.setSaving(true);
-    try {
-      await store.saveItems(type, changed, 'Volgorde van de pagina’s in het menu aangepast');
-      toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success');
-    } catch (e) {
-      toast('Volgorde opslaan mislukt: ' + e.message, 'error', 10000);
-    } finally {
-      busy = false; ctx.setSaving(false);
-      render();
-      if (keyboard) tbody.querySelector(`tr[data-id="${CSS.escape(slug)}"] .drag-handle`)?.focus();
-    }
+  // Na slepen niet meteen opslaan: eerst nog meer kunnen slepen, na een paar seconden rust alles in één keer
+  const pending = new Map(); // adres -> nieuwe plek in het menu (nog niet opgeslagen)
+  const orderStatus = h('p', { class: 'order-status', role: 'status', hidden: true });
+  const saver = createDelayedSaver({
+    save: async () => {
+      const items = [...pending].map(([slug, order]) => {
+        const cur = store.get(type, slug);
+        return cur && cur.item.menuOrder !== order ? { ...cur.item, menuOrder: order } : null;
+      }).filter(Boolean);
+      pending.clear();
+      if (!items.length) return;
+      ctx.setSaving(true);
+      try { await store.saveItems(type, items, 'Volgorde van de pagina’s in het menu aangepast'); } finally { ctx.setSaving(false); }
+    },
+    onState: (s, err) => showOrderState(s, err),
+  });
+
+  function showOrderState(state, err) {
+    if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder slepen.';
+    else if (state === 'saving') orderStatus.textContent = 'Bezig met opslaan…';
+    else if (state === 'saved') { orderStatus.textContent = ''; toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success'); }
+    else if (state === 'error') { orderStatus.textContent = ''; toast('Volgorde opslaan mislukt: ' + err.message, 'error', 10000); render(); }
+    orderStatus.hidden = !orderStatus.textContent;
   }
-  makeSortable(tbody, { items: 'tr[data-id]', enabled: () => sortable && !busy, onReorder: (from, to, o) => reorder(from, to, o.keyboard) });
+  const onUnload = (e) => { if (saver.busy) { saver.flush(); e.preventDefault(); e.returnValue = ''; } };
+  window.addEventListener('beforeunload', onUnload);
+
+  function reorder(from, to, keyboard) {
+    const ordered = moveInArray(shown, from, to);
+    const slug = ordered[to].slug;
+    ordered.forEach((item, i) => { const order = (i + 1) * 10; if (item.menuOrder !== order) pending.set(item.slug, order); });
+    render();
+    if (keyboard) tbody.querySelector(`tr[data-id="${CSS.escape(slug)}"] .drag-handle`)?.focus();
+    saver.schedule();
+  }
+  makeSortable(tbody, { items: 'tr[data-id]', enabled: () => sortable, onReorder: (from, to, o) => reorder(from, to, o.keyboard) });
   const counts = h('div', { class: 'filters', role: 'tablist', 'aria-label': 'Filter' });
   const search = h('input', { type: 'search', class: 'search', placeholder: `Zoek in ${t.plural}…`, 'aria-label': `Zoek in ${t.plural}`, oninput: () => { query = search.value.toLowerCase(); render(); } });
 
@@ -56,7 +73,8 @@ export function listView(ctx, type) {
   }
 
   function render() {
-    const all = store.list(type);
+    // nog niet opgeslagen volgorde (pending) gaat voor
+    const all = store.list(type).map((i) => (pending.has(i.slug) ? { ...i, menuOrder: pending.get(i.slug) } : i));
     const n = { all: all.length, published: all.filter((i) => i.status === 'published').length, draft: all.filter((i) => i.status !== 'published').length };
     clear(counts);
     for (const [key, label] of [['all', 'Alles'], ['published', 'Online'], ['draft', 'Concepten']]) {
@@ -108,12 +126,12 @@ export function listView(ctx, type) {
       h('h1', {}, t.label),
       h('a', { class: 'btn btn-primary', href: `#/${type}/new` }, icon('plus', 18), 'Nieuw toevoegen')),
     h('div', { class: 'list-tools' }, counts, search),
-    orderHint,
+    orderHint, orderStatus,
     h('div', { class: 'card card-flush' },
       h('table', { class: 'table' }, thead, tbody)),
   );
   render();
   const onChange = () => render();
   store.addEventListener('change', onChange);
-  return { el: root, destroy: () => store.removeEventListener('change', onChange) };
+  return { el: root, destroy: () => { saver.flush(); window.removeEventListener('beforeunload', onUnload); store.removeEventListener('change', onChange); } };
 }

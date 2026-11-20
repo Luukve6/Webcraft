@@ -165,6 +165,31 @@ export function makeSortable(container, { items, onReorder, enabled = () => true
   });
 }
 
+/**
+ * Uitgesteld opslaan: na een wijziging wachten tot er `delay` ms niets meer verandert, en dan alles in
+ * één keer opslaan. Ondertussen kan de gebruiker gewoon doorgaan (bijv. meer rijen slepen).
+ * @param {{ delay?: number, save: () => Promise<void>, onState?: (state: 'pending'|'saving'|'saved'|'error', err?: Error) => void }} opts
+ */
+export function createDelayedSaver({ delay = 3000, save, onState = () => {} }) {
+  let timer = null; let running = false; let again = false;
+  async function run() {
+    timer = null;
+    if (running) { again = true; return; }
+    running = true; onState('saving');
+    try { await save(); onState('saved'); } catch (e) { onState('error', e); } finally {
+      running = false;
+      if (again) { again = false; schedule(); }
+    }
+  }
+  function schedule() { clearTimeout(timer); onState('pending'); timer = setTimeout(run, delay); }
+  return {
+    schedule,
+    /** Nu meteen opslaan als er nog iets wacht (bijv. bij weggaan van de pagina). */
+    flush() { if (timer) { clearTimeout(timer); run(); } },
+    get busy() { return Boolean(timer) || running; },
+  };
+}
+
 /** Verplaatst een element in een array (geeft een nieuwe array). */
 export function moveInArray(arr, from, to) {
   const out = [...arr];

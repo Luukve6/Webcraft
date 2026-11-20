@@ -1,6 +1,6 @@
 // Overzicht en formulier voor collecties (eigen soorten inhoud uit config.json).
 
-import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray } from '../ui.js';
+import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray, createDelayedSaver } from '../ui.js';
 import { ConflictError } from '../lib/github.js';
 import { buildForm } from '../form.js';
 import { validateData, mergeData, entryId, entryTitle, sortEntries, formatEuro, defaultData, referenceErrors, reorderValues, nextOrderValue } from '../lib/schema.js';
@@ -44,8 +44,34 @@ export function collectionListView(ctx, name) {
   // "orderField" (bijv. volgorde): de volgorde verander je door de rijen te slepen
   const orderField = col.orderField;
   let sortable = false;
-  let busy = false;
   const thead = h('thead');
+  // Na slepen niet meteen opslaan: eerst nog meer kunnen slepen, na een paar seconden rust alles in één keer
+  const pending = new Map(); // id -> nieuw volgordenummer (nog niet opgeslagen)
+  const orderStatus = h('p', { class: 'order-status', role: 'status', hidden: true });
+  const saver = createDelayedSaver({
+    save: async () => {
+      const list = [...pending].map(([id, v]) => {
+        const e = store.getEntry(name, id);
+        return e && Number(e.data?.[orderField]) !== v ? { id, data: { ...e.data, [orderField]: v } } : null;
+      }).filter(Boolean);
+      pending.clear();
+      if (!list.length) return;
+      ctx.setSaving(true);
+      try { await store.saveEntries(name, list, `Volgorde van de ${col.labelPlural || col.label.toLowerCase()} aangepast`); } finally { ctx.setSaving(false); }
+    },
+    onState: (s, err) => showOrderState(s, err),
+  });
+
+  function showOrderState(state, err) {
+    if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder slepen.';
+    else if (state === 'saving') orderStatus.textContent = 'Bezig met opslaan…';
+    else if (state === 'saved') { orderStatus.textContent = ''; toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success'); }
+    else if (state === 'error') { orderStatus.textContent = ''; toast('Volgorde opslaan mislukt: ' + err.message, 'error', 10000); render(); }
+    orderStatus.hidden = !orderStatus.textContent;
+  }
+  const onUnload = (e) => { if (saver.busy) { saver.flush(); e.preventDefault(); e.returnValue = ''; } };
+  window.addEventListener('beforeunload', onUnload);
+
   const table = h('table', { class: 'table' });
   const orderHint = orderField ? h('p', { class: 'muted small order-hint' }) : null;
 
@@ -73,23 +99,13 @@ export function collectionListView(ctx, name) {
   }
 
   /** Na slepen: nieuwe volgorde van `list` (de rijen van één groep) opslaan in één commit. */
-  async function reorder(list, from, to, groupLabel, keyboard) {
+  function reorder(list, from, to, keyboard) {
     const ordered = moveInArray(list, from, to);
-    const changed = reorderValues(ordered, orderField);
     const id = ordered[to].id;
-    if (!changed.length) { render(); return; }
-    busy = true; ctx.setSaving(true);
-    try {
-      const where = groupLabel ? ` (${groupLabel})` : '';
-      await store.saveEntries(name, changed, `Volgorde van de ${col.labelPlural || col.label.toLowerCase()} aangepast${where}`);
-      toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success');
-    } catch (e) {
-      toast('Volgorde opslaan mislukt: ' + e.message, 'error', 10000);
-    } finally {
-      busy = false; ctx.setSaving(false);
-      render();
-      if (keyboard) table.querySelector(`tr[data-id="${CSS.escape(id)}"] .drag-handle`)?.focus();
-    }
+    for (const c of reorderValues(ordered, orderField)) pending.set(c.id, c.data[orderField]);
+    render();
+    if (keyboard) table.querySelector(`tr[data-id="${CSS.escape(id)}"] .drag-handle`)?.focus();
+    saver.schedule();
   }
 
   function row(entry) {
@@ -106,7 +122,8 @@ export function collectionListView(ctx, name) {
   }
 
   function render() {
-    let entries = sortEntries(col, store.listEntries(name));
+    // nog niet opgeslagen volgorde (pending) gaat voor
+    let entries = sortEntries(col, store.listEntries(name).map((e) => (pending.has(e.id) ? { ...e, data: { ...e.data, [orderField]: pending.get(e.id) } } : e)));
     const total = entries.length;
     if (group) entries = entries.filter((e) => String(e.data?.[col.groupBy.field] ?? '') === group);
     if (query) entries = entries.filter((e) => columns.some((c) => columnText(c, e.data).toLowerCase().includes(query)) || JSON.stringify(e.data).toLowerCase().includes(query));
@@ -120,7 +137,7 @@ export function collectionListView(ctx, name) {
     const bodies = [];
     const body = (list, label, header) => {
       const tb = h('tbody', {}, header || null, ...list.map(row));
-      if (sortable && list.length > 1) makeSortable(tb, { items: 'tr[data-id]', enabled: () => !busy, onReorder: (from, to, o) => reorder(list, from, to, label, o.keyboard) });
+      if (sortable && list.length > 1) makeSortable(tb, { items: 'tr[data-id]', onReorder: (from, to, o) => reorder(list, from, to, o.keyboard) });
       return tb;
     };
     if (!entries.length) {
@@ -145,9 +162,10 @@ export function collectionListView(ctx, name) {
       col.allowCreate ? h('a', { class: 'btn btn-primary', href: `#/c/${name}/new` }, icon('plus', 18), 'Nieuw toevoegen') : null),
     col.description ? h('p', { class: 'lead' }, col.description) : null,
     h('div', { class: 'list-tools' }, h('div', { class: 'inline-row' }, groupSelect, countEl), search),
-    orderHint,
+    orderHint, orderStatus,
     h('div', { class: 'card card-flush' }, table));
-  return { el };
+  // Bij weggaan: wat nog wacht meteen opslaan
+  return { el, destroy: () => { saver.flush(); window.removeEventListener('beforeunload', onUnload); } };
 }
 
 /**
