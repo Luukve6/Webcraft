@@ -73,3 +73,16 @@ test('categorieën: dezelfde korte code twee keer wordt geweigerd', () => {
   const e = validateData(col('categorieen').fields, { categorieen: [{ id: 'soepen', titel: 'Soepen' }, { id: 'soepen', titel: 'Soepen 2' }] });
   assert.match(e.categorieen, /"soepen" staat er twee keer in/);
 });
+
+test('slepen: volgordenummers van de groep worden opnieuw verdeeld, alleen wat verandert', async () => {
+  const { reorderValues, nextOrderValue } = await import('../admin/js/lib/schema.js');
+  const a = { id: 'a', data: { volgorde: 100 } }; const b = { id: 'b', data: { volgorde: 110 } }; const c = { id: 'c', data: { volgorde: 120 } };
+  // c naar boven: c=100, a=110, b=120
+  assert.deepEqual(reorderValues([c, a, b], 'volgorde').map((x) => [x.id, x.data.volgorde]), [['c', 100], ['a', 110], ['b', 120]]);
+  // niets veranderd
+  assert.deepEqual(reorderValues([a, b, c], 'volgorde'), []);
+  // ontbrekende of dubbele nummers: 10, 20, 30
+  assert.deepEqual(reorderValues([{ id: 'x', data: {} }, { id: 'y', data: { volgorde: 5 } }], 'volgorde').map((x) => x.data.volgorde), [10, 20]);
+  assert.equal(nextOrderValue([a, b, c], 'volgorde'), 130);
+  assert.equal(nextOrderValue([], 'volgorde'), 10);
+});

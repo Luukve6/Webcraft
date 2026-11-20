@@ -254,6 +254,50 @@ export class Store extends EventTarget {
     return entry;
   }
 
+  /**
+   * Meerdere items van een collectie tegelijk opslaan, in één commit (bijv. na slepen de nieuwe volgorde).
+   * @param {string} name
+   * @param {{ id: string, data: object }[]} list
+   * @param {string} message
+   */
+  async saveEntries(name, list, message) {
+    if (!list.length) return;
+    const changes = []; const expected = {};
+    for (const { id, data } of list) {
+      const e = this.getEntry(name, id);
+      changes.push({ path: e.path, content: serializeData(data) });
+      expected[e.path] = e.sha;
+    }
+    const result = await this.client.commit({ message: message + '\n\nVia het beheer (/admin).', changes, expected });
+    for (const { id, data } of list) {
+      const e = this.getEntry(name, id);
+      this.entries.get(name).set(id, { ...e, sha: result.shas[e.path], data: JSON.parse(serializeData(data)) });
+    }
+    this.afterCommit(result, message);
+  }
+
+  /**
+   * Meerdere pagina's tegelijk opslaan in één commit (bijv. na slepen de volgorde in het menu).
+   * @param {string} type
+   * @param {object[]} items  volledige items (adres blijft gelijk)
+   * @param {string} message
+   */
+  async saveItems(type, items, message) {
+    if (!items.length) return;
+    const changes = []; const expected = {};
+    for (const item of items) {
+      const cur = this.get(type, item.slug);
+      changes.push({ path: cur.path, content: serializeItem(type, item) });
+      expected[cur.path] = cur.sha;
+    }
+    const result = await this.client.commit({ message: message + '\n\nVia het beheer (/admin).', changes, expected });
+    for (const item of items) {
+      const cur = this.get(type, item.slug);
+      this.items[type].set(item.slug, { path: cur.path, sha: result.shas[cur.path], item: parseItem(type, serializeItem(type, item), cur.path) });
+    }
+    this.afterCommit(result, message);
+  }
+
   async deleteEntry(name, id) {
     const col = this.collection(name);
     const entry = this.getEntry(name, id);

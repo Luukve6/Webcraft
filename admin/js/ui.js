@@ -62,6 +62,7 @@ const ICONS = {
   star: 'M12 17.3l6.2 3.7-1.6-7 5.4-4.7-7.2-.6L12 2 9.2 8.7 2 9.3l5.4 4.7-1.6 7z',
   truck: 'M20 8h-3V4H3a2 2 0 0 0-2 2v11h2a3 3 0 0 0 6 0h6a3 3 0 0 0 6 0h2v-5l-3-4zM6 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm13.5-9 2 2.5H17V9.5h2.5zM18 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
   download: 'M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z',
+  grip: 'M9 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm9-13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z',
   sun: 'M6.8 4.8 5 3 3.6 4.4l1.8 1.8 1.4-1.4zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7 1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91 1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z',
 };
 
@@ -78,6 +79,98 @@ export function icon(name, size = 20) {
   path.setAttribute('fill', 'currentColor');
   svg.append(path);
   return svg;
+}
+
+// ---------- Slepen om de volgorde te veranderen ----------
+
+/** Sleepgreep (6 puntjes) links in een blok. */
+export function dragHandle(label) {
+  return h('button', {
+    type: 'button', class: 'drag-handle', 'aria-label': `${label} verplaatsen`,
+    title: 'Sleep om te verplaatsen (of gebruik de pijltjestoetsen)',
+  }, icon('grip', 18));
+}
+
+/**
+ * Maakt de blokken in `container` versleepbaar aan hun .drag-handle.
+ * Werkt met muis, vinger (telefoon/tablet) en toetsenbord (pijltje omhoog/omlaag op de greep).
+ * Tijdens het slepen schuift het blok live tussen de andere; bij loslaten volgt onReorder(van, naar).
+ * @param {HTMLElement} container
+ * @param {{ items: string, onReorder: (from: number, to: number, opts: { keyboard: boolean }) => void, enabled?: () => boolean }} opts
+ *   items: CSS-selector voor de blokken (directe kinderen van container)
+ */
+export function makeSortable(container, { items, onReorder, enabled = () => true }) {
+  const list = () => [...container.children].filter((el) => el.matches(items));
+  const itemOf = (el) => list().find((it) => it.contains(el));
+
+  container.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle || !container.contains(handle) || e.button > 0 || !enabled()) return;
+    const item = itemOf(handle);
+    if (!item) return;
+    e.preventDefault();
+    const start = list().indexOf(item);
+    item.classList.add('is-dragging');
+    container.classList.add('is-sorting');
+    // Luisteren op het hele venster: het blok (en de greep) verhuist tijdens het slepen in de pagina,
+    // waardoor de greep de muis/vinger anders 'kwijtraakt'.
+    const pid = e.pointerId;
+    let scroller = null; let lastY = e.clientY;
+
+    const place = (y) => {
+      const others = list().filter((el) => el !== item);
+      const before = others.find((el) => { const r = el.getBoundingClientRect(); return y < r.top + r.height / 2; });
+      if (before) { if (item.nextElementSibling !== before) before.before(item); }
+      else if (others.length) { const last = others[others.length - 1]; if (last.nextElementSibling !== item) last.after(item); }
+    };
+    // Aan de rand van het scherm vanzelf mee scrollen
+    const autoScroll = () => {
+      const edge = 70;
+      const dy = lastY < edge ? -14 : lastY > window.innerHeight - edge ? 14 : 0;
+      if (dy) { window.scrollBy(0, dy); place(lastY); }
+      scroller = requestAnimationFrame(autoScroll);
+    };
+    scroller = requestAnimationFrame(autoScroll);
+
+    const move = (ev) => { if (ev.pointerId !== pid) return; ev.preventDefault(); lastY = ev.clientY; place(ev.clientY); };
+    const end = (ev) => {
+      if (ev && ev.pointerId !== pid) return;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      cancelAnimationFrame(scroller);
+      item.classList.remove('is-dragging');
+      container.classList.remove('is-sorting');
+      const to = list().indexOf(item);
+      if (to !== start) onReorder(start, to, { keyboard: false });
+    };
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+  });
+
+  // Klik op de greep doet niets (bijv. geen inklappen van een blok)
+  container.addEventListener('click', (e) => { if (e.target.closest('.drag-handle')) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+  container.addEventListener('keydown', (e) => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle || !container.contains(handle) || !enabled()) return;
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const all = list();
+    const from = all.indexOf(itemOf(handle));
+    const to = from + (e.key === 'ArrowUp' ? -1 : 1);
+    if (from < 0 || to < 0 || to >= all.length) return;
+    onReorder(from, to, { keyboard: true });
+  });
+}
+
+/** Verplaatst een element in een array (geeft een nieuwe array). */
+export function moveInArray(arr, from, to) {
+  const out = [...arr];
+  const [x] = out.splice(from, 1);
+  out.splice(to, 0, x);
+  return out;
 }
 
 // ---------- Meldingen (rechtsonder) ----------

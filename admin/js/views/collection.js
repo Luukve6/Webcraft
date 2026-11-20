@@ -1,9 +1,9 @@
 // Overzicht en formulier voor collecties (eigen soorten inhoud uit config.json).
 
-import { h, fill, icon, toast, confirmDialog, modal } from '../ui.js';
+import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray } from '../ui.js';
 import { ConflictError } from '../lib/github.js';
 import { buildForm } from '../form.js';
-import { validateData, mergeData, entryId, entryTitle, sortEntries, formatEuro, defaultData, referenceErrors } from '../lib/schema.js';
+import { validateData, mergeData, entryId, entryTitle, sortEntries, formatEuro, defaultData, referenceErrors, reorderValues, nextOrderValue } from '../lib/schema.js';
 
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
@@ -40,8 +40,14 @@ export function collectionListView(ctx, name) {
   const groups = groupOptions(ctx, col);
   const columns = col.columns || [{ field: col.titleField || col.fields[0].name, label: 'Naam' }];
   const titleField = col.titleField || col.fields[0].name;
-  const tbody = h('tbody');
   const countEl = h('p', { class: 'muted small' });
+  // "orderField" (bijv. volgorde): de volgorde verander je door de rijen te slepen
+  const orderField = col.orderField;
+  let sortable = false;
+  let busy = false;
+  const thead = h('thead');
+  const table = h('table', { class: 'table' });
+  const orderHint = orderField ? h('p', { class: 'muted small order-hint' }) : null;
 
   const groupSelect = groups
     ? h('select', { class: 'group-select', 'aria-label': col.groupBy.label || 'Groep', onchange: () => { group = groupSelect.value; render(); } },
@@ -66,9 +72,30 @@ export function collectionListView(ctx, name) {
     }
   }
 
+  /** Na slepen: nieuwe volgorde van `list` (de rijen van één groep) opslaan in één commit. */
+  async function reorder(list, from, to, groupLabel, keyboard) {
+    const ordered = moveInArray(list, from, to);
+    const changed = reorderValues(ordered, orderField);
+    const id = ordered[to].id;
+    if (!changed.length) { render(); return; }
+    busy = true; ctx.setSaving(true);
+    try {
+      const where = groupLabel ? ` (${groupLabel})` : '';
+      await store.saveEntries(name, changed, `Volgorde van de ${col.labelPlural || col.label.toLowerCase()} aangepast${where}`);
+      toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success');
+    } catch (e) {
+      toast('Volgorde opslaan mislukt: ' + e.message, 'error', 10000);
+    } finally {
+      busy = false; ctx.setSaving(false);
+      render();
+      if (keyboard) table.querySelector(`tr[data-id="${CSS.escape(id)}"] .drag-handle`)?.focus();
+    }
+  }
+
   function row(entry) {
     const href = `#/c/${name}/edit/${encodeURIComponent(entry.id)}`;
-    return h('tr', {},
+    return h('tr', { 'data-id': entry.id },
+      sortable ? h('td', { class: 'col-drag' }, dragHandle(`"${entryTitle(col, entry.data, entry.id)}"`)) : null,
       ...columns.map((c, i) => (i === 0 || c.field === titleField
         ? h('td', { class: 'col-title', 'data-label': c.label },
           h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'),
@@ -84,21 +111,31 @@ export function collectionListView(ctx, name) {
     if (group) entries = entries.filter((e) => String(e.data?.[col.groupBy.field] ?? '') === group);
     if (query) entries = entries.filter((e) => columns.some((c) => columnText(c, e.data).toLowerCase().includes(query)) || JSON.stringify(e.data).toLowerCase().includes(query));
     countEl.textContent = entries.length === total ? `${total} ${total === 1 ? col.labelSingular : col.labelPlural || col.label.toLowerCase()}` : `${entries.length} van de ${total}`;
-    const rows = [];
+    // Slepen kan niet tijdens zoeken (dan zie je niet alle rijen)
+    sortable = Boolean(orderField) && !query;
+    if (orderHint) orderHint.textContent = sortable ? 'Sleep een rij aan het greepje links om de volgorde op de website te veranderen.' : 'Maak het zoekveld leeg om de volgorde te veranderen.';
+    const span = columns.length + (sortable ? 1 : 0);
+    fill(thead, h('tr', {}, sortable ? h('th', { class: 'col-drag', scope: 'col' }, h('span', { class: 'sr-only' }, 'Verplaatsen')) : null,
+      columns.map((c) => h('th', { scope: 'col', class: c.format === 'euro' ? 'num' : null }, c.label))));
+    const bodies = [];
+    const body = (list, label, header) => {
+      const tb = h('tbody', {}, header || null, ...list.map(row));
+      if (sortable && list.length > 1) makeSortable(tb, { items: 'tr[data-id]', enabled: () => !busy, onReorder: (from, to, o) => reorder(list, from, to, label, o.keyboard) });
+      return tb;
+    };
     if (!entries.length) {
-      rows.push(h('tr', {}, h('td', { colspan: columns.length, class: 'empty' }, total ? 'Niets gevonden.' : `Er is nog niets. Klik op "Nieuw toevoegen".`)));
+      bodies.push(h('tbody', {}, h('tr', {}, h('td', { colspan: span, class: 'empty' }, total ? 'Niets gevonden.' : `Er is nog niets. Klik op "Nieuw toevoegen".`))));
     } else if (groups && !group) {
       const known = new Set(groups.map((g) => g.value));
       for (const g of [...groups, { value: null, label: 'Zonder (bestaande) ' + (col.groupBy.label || 'groep').toLowerCase() }]) {
         const inGroup = entries.filter((e) => (g.value === null ? !known.has(String(e.data?.[col.groupBy.field] ?? '')) : String(e.data?.[col.groupBy.field] ?? '') === g.value));
         if (!inGroup.length) continue;
-        rows.push(h('tr', { class: 'group-row' }, h('th', { colspan: columns.length, scope: 'colgroup' }, `${g.label} (${inGroup.length})`)));
-        rows.push(...inGroup.map(row));
+        bodies.push(body(inGroup, g.label, h('tr', { class: 'group-row' }, h('th', { colspan: span, scope: 'colgroup' }, `${g.label} (${inGroup.length})`))));
       }
     } else {
-      rows.push(...entries.map(row));
+      bodies.push(body(entries, group ? groups?.find((g) => g.value === group)?.label : ''));
     }
-    fill(tbody, ...rows);
+    fill(table, thead, ...bodies);
   }
   render();
 
@@ -108,10 +145,8 @@ export function collectionListView(ctx, name) {
       col.allowCreate ? h('a', { class: 'btn btn-primary', href: `#/c/${name}/new` }, icon('plus', 18), 'Nieuw toevoegen') : null),
     col.description ? h('p', { class: 'lead' }, col.description) : null,
     h('div', { class: 'list-tools' }, h('div', { class: 'inline-row' }, groupSelect, countEl), search),
-    h('div', { class: 'card card-flush' },
-      h('table', { class: 'table' },
-        h('thead', {}, h('tr', {}, columns.map((c) => h('th', { scope: 'col', class: c.format === 'euro' ? 'num' : null }, c.label)))),
-        tbody)));
+    orderHint,
+    h('div', { class: 'card card-flush' }, table));
   return { el };
 }
 
@@ -176,6 +211,16 @@ export function collectionEditView(ctx, name, id) {
 
     const data = mergeData(col.fields, entry ? entry.data : {}, values);
     if (!entry) for (const [k, v] of Object.entries(col.defaults || {})) if (!(k in data)) data[k] = v;
+    // Volgorde: een nieuw item (of een item dat naar een andere groep gaat) komt achteraan in de groep
+    if (col.orderField && !isFile) {
+      const gf = col.groupBy?.field;
+      const movedGroup = entry && gf && String(entry.data?.[gf] ?? '') !== String(data[gf] ?? '');
+      const missing = data[col.orderField] === undefined || data[col.orderField] === null || data[col.orderField] === '';
+      if (!entry || movedGroup || missing) {
+        const peers = store.listEntries(name).filter((e) => (!entry || e.id !== entry.id) && (!gf || String(e.data?.[gf] ?? '') === String(data[gf] ?? '')));
+        data[col.orderField] = nextOrderValue(peers, col.orderField);
+      }
+    }
     saving = true; updateStatus(); ctx.setSaving(true);
     try {
       entry = await store.saveEntry(name, entry ? entry.id : null, data, newId, form.getUploads());

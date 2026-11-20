@@ -43,6 +43,7 @@
         "volgorde",
         "nummer"
       ],
+      "orderField": "volgorde",
       "groupBy": {
         "field": "categorie",
         "label": "Categorie",
@@ -125,11 +126,7 @@
         },
         {
           "name": "volgorde",
-          "label": "Plek op de kaart",
-          "widget": "number",
-          "integer": true,
-          "required": false,
-          "hint": "Kleiner getal = hoger op de kaart. Tussen 120 en 130 zet u een nieuw gerecht met 125."
+          "widget": "hidden"
         }
       ]
     },

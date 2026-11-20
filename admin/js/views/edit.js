@@ -70,17 +70,16 @@ export function editView(ctx, type, slug) {
     : null;
 
   // Pagina-specifiek
-  let menuCheck; let orderInput;
+  let menuCheck;
   // Bericht-specifiek
   let dateInput; let excerptInput; let imageValue = item.image || ''; let imageBox;
 
   const sidePanels = [];
   if (type === 'pages') {
     menuCheck = h('input', { type: 'checkbox', id: 'in-menu', checked: item.inMenu, onchange: markDirty });
-    orderInput = h('input', { type: 'number', min: 0, max: 999, value: String(item.menuOrder), class: 'input-small', oninput: markDirty });
     sidePanels.push(panel('Menu',
       h('label', { class: 'check' }, menuCheck, ' Toon deze pagina in het menu'),
-      field({ label: 'Plaats in het menu', input: orderInput, help: 'Lager nummer = meer naar links.' })));
+      h('p', { class: 'small muted' }, 'De volgorde in het menu verander je door de pagina’s te slepen in de lijst ', h('a', { href: '#/pages' }, 'Pagina’s'), '.')));
   } else {
     dateInput = h('input', { type: 'date', value: item.date, oninput: markDirty });
     excerptInput = h('textarea', { rows: 3, maxlength: 400, oninput: markDirty }, item.excerpt);
@@ -139,7 +138,7 @@ export function editView(ctx, type, slug) {
     };
     if (type === 'pages') {
       data.inMenu = menuCheck.checked;
-      data.menuOrder = parseInt(orderInput.value, 10) || 0;
+      data.menuOrder = item.menuOrder; // volgorde wordt in de lijst gesleept
     } else {
       data.date = dateInput.value || new Date().toISOString().slice(0, 10);
       data.excerpt = excerptInput.value.trim();

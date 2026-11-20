@@ -1,6 +1,6 @@
 // Bouwt een formulier uit de velden van een collectie (zie lib/schema.js).
 
-import { h, field as fieldWrap, setFieldError, fill } from './ui.js';
+import { h, field as fieldWrap, setFieldError, fill, dragHandle, makeSortable } from './ui.js';
 import { defaultValue, parseNumber, formatEuro, fillTemplate, uploadTarget, dateWindowText } from './lib/schema.js';
 
 let uid = 0;
@@ -211,11 +211,12 @@ function relationOptions(f, ctx) {
   return (Array.isArray(list) ? list : []).map((o) => ({ value: o[f.valueField || 'id'], label: o[f.labelField || 'title'] ?? o[f.valueField || 'id'] }));
 }
 
-function moveButtons(rows, i, rerender, label) {
-  return [
-    h('button', { type: 'button', class: 'btn btn-small btn-icon', title: 'Omhoog', 'aria-label': `${label} omhoog`, disabled: i === 0, onclick: () => { [rows[i - 1], rows[i]] = [rows[i], rows[i - 1]]; rerender(i - 1); } }, '↑'),
-    h('button', { type: 'button', class: 'btn btn-small btn-icon', title: 'Omlaag', 'aria-label': `${label} omlaag`, disabled: i === rows.length - 1, onclick: () => { [rows[i + 1], rows[i]] = [rows[i], rows[i + 1]]; rerender(i + 1); } }, '↓'),
-  ];
+/** Na een sleepbeweging: rijen in de nieuwe volgorde zetten en opnieuw tekenen. */
+function reorderRows(rows, from, to, rerender, keyboard, listEl) {
+  const [row] = rows.splice(from, 1);
+  rows.splice(to, 0, row);
+  rerender();
+  if (keyboard) listEl.children[to]?.querySelector('.drag-handle')?.focus();
 }
 
 /** Lijst met losse tekstregels (bijv. gerechten van het maandmenu). */
@@ -232,8 +233,7 @@ function renderSimpleList(f, value, key, ctx) {
       input.setAttribute('aria-label', `${cap(single)} ${i + 1}`);
       input.addEventListener('input', () => { row.value = input.value; });
       row.input = input;
-      const li = h('li', { class: 'simple-row' }, input,
-        ...moveButtons(rows, i, rerender, cap(single)),
+      const li = h('li', { class: 'simple-row' }, dragHandle(`${cap(single)} ${i + 1}`), input,
         h('button', { type: 'button', class: 'btn btn-small btn-icon btn-danger-outline', title: 'Verwijderen', 'aria-label': `${cap(single)} ${i + 1} verwijderen`, onclick: () => { rows.splice(i, 1); rerender(Math.min(i, rows.length - 1)); ctx.changed(); } }, '✕'),
         h('p', { class: 'field-error', hidden: true }));
       ctx.registry.push({ key: `${key}.${i}`, wrapper: li });
@@ -243,6 +243,7 @@ function renderSimpleList(f, value, key, ctx) {
     ctx.changed();
   }
   rerender();
+  makeSortable(listEl, { items: 'li', onReorder: (from, to, o) => reorderRows(rows, from, to, rerender, o.keyboard, listEl) });
 
   const addBtn = h('button', { type: 'button', class: 'btn btn-small', onclick: () => { rows.push({ value: '' }); rerender(rows.length - 1); } }, `+ ${cap(single)} toevoegen`);
   const wrapper = h('fieldset', { class: 'field fieldset-plain' },
@@ -278,11 +279,10 @@ function renderObjectList(f, value, key, ctx) {
       };
       updateSummary();
       const det = h('details', { class: 'object-item', open: row.open, ontoggle: () => { row.open = det.open; }, oninput: updateSummary, onchange: updateSummary },
-        h('summary', {}, summaryText),
+        h('summary', {}, dragHandle(summaryText.textContent || `${cap(single)} ${i + 1}`), summaryText),
         h('div', { class: 'object-body' }, part.el,
-          h('div', { class: 'btn-row' },
-            ...moveButtons(rows, i, rerender, cap(single)),
-            f.allowAdd ? h('button', { type: 'button', class: 'btn btn-small btn-danger-outline', onclick: () => { rows.splice(i, 1); rerender(); ctx.changed(); } }, `${cap(single)} verwijderen`) : null)));
+          f.allowAdd ? h('div', { class: 'btn-row' },
+            h('button', { type: 'button', class: 'btn btn-small btn-danger-outline', onclick: () => { rows.splice(i, 1); rerender(); ctx.changed(); } }, `${cap(single)} verwijderen`)) : null));
       return det;
     }));
     if (focusIndex !== null && listEl.children[focusIndex]) {
@@ -293,6 +293,7 @@ function renderObjectList(f, value, key, ctx) {
     ctx.changed();
   }
   rerender();
+  makeSortable(listEl, { items: 'details', onReorder: (from, to, o) => reorderRows(rows, from, to, rerender, o.keyboard, listEl) });
 
   const addBtn = h('button', { type: 'button', class: 'btn btn-small', onclick: () => {
     rows.push({ data: Object.fromEntries(f.fields.map((x) => [x.name, defaultValue(x)])), orig: undefined, open: true });

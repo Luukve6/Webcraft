@@ -293,3 +293,27 @@ export function referenceErrors(col, values, store, before = {}) {
   }
   return errors;
 }
+
+/**
+ * Nieuwe volgorde na slepen. `ordered` = items (met .id en .data) in de nieuwe volgorde.
+ * De bestaande volgordenummers van precies deze items worden opnieuw verdeeld (laag -> hoog),
+ * zodat andere items (bijv. in een andere categorie) niet veranderen. Ontbreken er nummers of
+ * zijn ze dubbel, dan wordt het 10, 20, 30, ...
+ * Geeft alleen de items terug waarvan het nummer verandert: [{ id, data }].
+ */
+export function reorderValues(ordered, field) {
+  const nums = ordered.map((e) => Number(e.data?.[field]));
+  const valid = nums.every((n) => Number.isFinite(n)) && new Set(nums).size === nums.length;
+  const values = valid ? [...nums].sort((a, b) => a - b) : ordered.map((_, i) => (i + 1) * 10);
+  const out = [];
+  ordered.forEach((e, i) => {
+    if (Number(e.data?.[field]) !== values[i] || !valid) out.push({ id: e.id, data: { ...e.data, [field]: values[i] } });
+  });
+  return out;
+}
+
+/** Volgordenummer voor een nieuw item achteraan (in de groep, als die er is). */
+export function nextOrderValue(entries, field, step = 10) {
+  const nums = entries.map((e) => Number(e.data?.[field])).filter((n) => Number.isFinite(n));
+  return (nums.length ? Math.max(...nums) : 0) + step;
+}
