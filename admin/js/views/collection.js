@@ -307,7 +307,8 @@ export function collectionEditView(ctx, name, id) {
 }
 
 function backLink(col) {
+  // Een vast onderdeel (bijv. Openingstijden) staat zelf in het menu: geen "terug naar het overzicht"
   return col.kind === 'file'
-    ? h('a', { class: 'back-link', href: '#/' }, icon('back', 18), 'Terug naar het overzicht')
+    ? null
     : h('a', { class: 'back-link', href: `#/c/${col.name}` }, icon('back', 18), `Terug naar ${col.label.toLowerCase()}`);
 }
