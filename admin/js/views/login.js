@@ -43,7 +43,6 @@ export function loginView({ config, onToken, error }) {
     eyeBtn.setAttribute('aria-label', show ? 'Sleutel verbergen' : 'Sleutel tonen');
   } }, eyeIcon());
   const tokenBtn = h('button', { type: 'submit', class: 'btn btn-primary' }, 'Inloggen');
-  const repo = `${config.repo.owner}/${config.repo.name}`;
 
   const tokenForm = h('form', { class: 'token-form', onsubmit: async (e) => {
     e.preventDefault();
@@ -66,16 +65,6 @@ export function loginView({ config, onToken, error }) {
   h('div', { class: 'login-row' },
     h('label', { class: 'check remember' }, remember, ' Ingelogd blijven'),
     tokenBtn));
-
-  const howto = h('details', { class: 'howto' },
-    h('summary', {}, 'Hoe maak ik een toegangssleutel?'),
-    h('ol', {},
-      h('li', {}, 'Ga naar ', h('a', { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener' }, 'GitHub → Fine-grained token maken'), '.'),
-      h('li', {}, 'Geef de sleutel een naam (bijv. "Webcraft") en kies een vervaldatum.'),
-      h('li', {}, 'Kies bij "Repository access" voor "Only select repositories" en selecteer ', h('strong', {}, repo), '.'),
-      h('li', {}, 'Zet bij "Permissions" ', h('strong', {}, 'Contents'), ' op "Read and write". Zet ook ', h('strong', {}, 'Actions'), ' en ', h('strong', {}, 'Pages'), ' op "Read-only" (voor de publicatiestatus).'),
-      h('li', {}, 'Klik op "Generate token", kopieer de sleutel en plak hem hierboven.')),
-    h('p', { class: 'small muted' }, 'De sleutel wordt alleen in deze browser bewaard en nergens anders naartoe gestuurd dan naar GitHub.'));
 
   const mockNote = config.localMode
     ? h('div', { class: 'notice notice-info' },
@@ -107,7 +96,6 @@ export function loginView({ config, onToken, error }) {
         oauthBtn ? h('div', { class: 'or' }, h('span', {}, 'of')) : null,
         oauthBtn ? h('details', { class: 'alt-login' }, h('summary', {}, 'Inloggen met een toegangssleutel'), tokenForm) : tokenForm),
       h('div', { class: 'login-below small' },
-        howto,
         h('p', { class: 'muted' }, 'Vink "Ingelogd blijven" alleen aan op je eigen computer.'),
         h('p', {}, h('a', { href: '../' }, '← Terug naar de website')),
         h('a', { class: 'login-webcraft', href: WEBCRAFT_URL, target: '_blank', rel: 'noopener', title: 'Over Webcraft (opent in een nieuw tabblad)' },
