@@ -333,7 +333,7 @@ tr.is-dragging td { background: var(--accent-light); }
 .login-row .remember { margin: 0; }
 .login-below { width: 100%; max-width: 360px; display: grid; gap: 4px; }
 .login-below p { margin: 0; }
-.login-webcraft { display: inline-flex; align-items: center; gap: 6px; justify-self: start; margin-top: 10px; color: var(--muted); text-decoration: none; }
+.login-webcraft { display: inline-flex; align-items: center; gap: 6px; justify-self: center; margin-top: 14px; color: var(--muted); text-decoration: none; }
 .login-webcraft:hover { color: var(--accent); }
 .login-card > .notice:first-child { margin-top: 0; }
 .loading-screen { align-content: center; gap: 12px; color: var(--muted); }
