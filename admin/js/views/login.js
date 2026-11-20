@@ -97,7 +97,7 @@ export function loginView({ config, onToken, error }) {
         oauthBtn ? h('details', { class: 'alt-login' }, h('summary', {}, 'Inloggen met een toegangssleutel'), tokenForm) : tokenForm),
       h('div', { class: 'login-below small' },
         h('p', { class: 'muted' }, 'Vink "Ingelogd blijven" alleen aan op je eigen computer.'),
-        h('p', {}, h('a', { href: '../' }, '← Terug naar de website')),
+        h('p', { class: 'login-back' }, h('a', { href: '../' }, '← Terug naar de website')),
         h('a', { class: 'login-webcraft', href: WEBCRAFT_URL, target: '_blank', rel: 'noopener', title: 'Over Webcraft (opent in een nieuw tabblad)' },
           h('img', { src: 'img/webcraft.svg', alt: '', width: 16, height: 16 }), 'Over Webcraft'))),
   };
