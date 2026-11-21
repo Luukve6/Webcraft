@@ -37,7 +37,7 @@ export function settingsView(ctx) {
     title: field({ label: 'Naam van de website', input: title }),
     url: field({ label: 'Adres van de website', input: url, optional: true, help: 'Het adres waarop de website online staat, bijv. www.mijnwebsite.nl. Wordt gebruikt voor de knop "Website bekijken" en voor de sitemap.' }),
     postcode: field({ label: 'Postcode', input: postcode, optional: true }),
-    phone: field({ label: 'Telefoonnummer', input: phone, optional: true, help: 'Zoals het op de website moet staan, bijv. 0318 12 34 56. Bezoekers op een telefoon kunnen erop tikken om te bellen.' }),
+    phone: field({ label: 'Telefoonnummer', input: phone, optional: true, help: 'Zoals het op de website moet staan, bijv. 06 12345678. Bezoekers op een telefoon kunnen erop tikken om te bellen.' }),
     email: field({ label: 'E-mailadres', input: email, optional: true }),
   };
   for (const x of SOCIALS) fields[x.key] = field({ label: x.label, input: socialInputs[x.key], optional: true, help: `Bijv. ${x.host}/uwbedrijf (https:// mag u weglaten).` });
@@ -55,7 +55,7 @@ export function settingsView(ctx) {
     if (siteUrl === null) fail('url', 'Dit is geen geldig webadres. Bijvoorbeeld: www.mijnwebsite.nl');
     const pc = normalizePostcode(postcode.value);
     const phoneText = phone.value.trim().replace(/\s+/g, ' ');
-    if (phoneText && !phoneHref(phoneText)) fail('phone', 'Dit lijkt geen telefoonnummer. Bijvoorbeeld: 0318 12 34 56');
+    if (phoneText && !phoneHref(phoneText)) fail('phone', 'Dit lijkt geen telefoonnummer. Bijvoorbeeld: 06 12345678');
     const mail = email.value.trim();
     if (mail && !isEmail(mail)) fail('email', 'Dit is geen geldig e-mailadres. Bijvoorbeeld: info@mijnbedrijf.nl');
     const socials = {};

@@ -43,7 +43,7 @@
           "name": "tagline",
           "label": "Korte omschrijving",
           "required": false,
-          "hint": "Bijv. Chinees-Indisch restaurant."
+          "hint": "Bijv. Italiaans restaurant."
         },
         {
           "name": "contact",
@@ -61,7 +61,7 @@
               "required": true,
               "pattern": [
                 "^\\s*\\d{4}\\s*[A-Za-z]{2}\\s*$",
-                "Vul een postcode in zoals 7051 AB."
+                "Vul een postcode in zoals 1234 AB."
               ]
             },
             {
@@ -73,10 +73,10 @@
               "name": "phoneDisplay",
               "label": "Telefoonnummer",
               "required": true,
-              "hint": "Zoals het op de website staat, bijv. 0315 243 593. Bezoekers op een telefoon kunnen erop tikken om te bellen.",
+              "hint": "Zoals het op de website staat, bijv. 06 12345678. Bezoekers op een telefoon kunnen erop tikken om te bellen.",
               "pattern": [
                 "^[\\s\\d()+-]{10,20}$",
-                "Vul een telefoonnummer in zoals 0315 243 593."
+                "Vul een telefoonnummer in zoals 06 12345678."
               ]
             },
             {
