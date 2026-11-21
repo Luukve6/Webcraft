@@ -48,13 +48,19 @@ export function dashboardView(ctx) {
       ? h('a', { class: 'tile', href: '#/pages' }, icon('page', 26), h('span', { class: 'tile-title' }, 'Pagina’s'),
         h('span', { class: 'tile-sub muted small' }, `${pages.length} ${pages.length === 1 ? 'pagina' : "pagina's"} · nieuwe maken`))
       : null;
+    const settingsTile = features.settings
+      ? h('a', { class: 'tile', href: '#/settings' }, icon('settings', 26), h('span', { class: 'tile-title' }, 'Algemeen'),
+        h('span', { class: 'tile-sub muted small' }, 'Aanpassen'))
+      : null;
+    const colTile = (c) => h('a', { class: 'tile', href: `#/c/${c.name}` },
+      icon(c.icon, 26),
+      h('span', { class: 'tile-title' }, c.label),
+      h('span', { class: 'tile-sub muted small' }, c.kind === 'folder' ? `${store.listEntries(c.name).length} ${c.labelPlural || c.label.toLowerCase()}` : (c.summaryLine || 'Aanpassen')));
+    // Zelfde volgorde als het menu links: Algemeen, Pagina's, daarna de rest
     const el = h('div', { class: 'view' },
       h('div', { class: 'view-header' }, h('h1', {}, 'Overzicht')),
       welcome,
-      h('div', { class: 'tiles' }, pageTile, cols.map((c) => h('a', { class: 'tile', href: `#/c/${c.name}` },
-        icon(c.icon, 26),
-        h('span', { class: 'tile-title' }, c.label),
-        h('span', { class: 'tile-sub muted small' }, c.kind === 'folder' ? `${store.listEntries(c.name).length} ${c.labelPlural || c.label.toLowerCase()}` : (c.summaryLine || 'Aanpassen'))))),
+      h('div', { class: 'tiles' }, settingsTile, cols.filter((c) => c.pinned).map(colTile), pageTile, cols.filter((c) => !c.pinned).map(colTile)),
       h('div', { class: 'grid-2' },
         h('section', { class: 'card' }, h('h2', {}, 'Publicatie'), pubBox),
         h('section', { class: 'card' }, h('h2', {}, 'Recente wijzigingen'), commitsList)));

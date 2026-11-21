@@ -30,7 +30,7 @@
       "label": "Algemeen",
       "icon": "settings",
       "pinned": true,
-      "description": "Naam, adres, telefoonnummer en Facebook. Dit staat op elke pagina van de website, onder andere onderaan en op de contactpagina.",
+      "description": "Naam, adres, telefoonnummer en sociale media. Dit staat op elke pagina van de website, onder andere bovenaan, onderaan en op de contactpagina.",
       "file": "content/overig.json",
       "previewUrl": "/contact",
       "fields": [
@@ -87,6 +87,26 @@
               "pattern": [
                 "^\\s*(https?://)?([a-z-]+\\.)?facebook\\.com/\\S+\\s*$",
                 "Vul een adres van Facebook in, bijv. facebook.com/uwrestaurant."
+              ]
+            },
+            {
+              "name": "instagram",
+              "label": "Instagram",
+              "required": false,
+              "hint": "Adres van het Instagram-profiel, bijv. instagram.com/uwrestaurant. Leeg = niet tonen.",
+              "pattern": [
+                "^\\s*(https?://)?([a-z-]+\\.)?instagram\\.com/\\S+\\s*$",
+                "Vul een adres van Instagram in, bijv. instagram.com/uwrestaurant."
+              ]
+            },
+            {
+              "name": "linkedin",
+              "label": "LinkedIn",
+              "required": false,
+              "hint": "Adres van de LinkedIn-pagina, bijv. linkedin.com/company/uwrestaurant. Leeg = niet tonen.",
+              "pattern": [
+                "^\\s*(https?://)?([a-z-]+\\.)?linkedin\\.com/\\S+\\s*$",
+                "Vul een adres van LinkedIn in, bijv. linkedin.com/company/uwrestaurant."
               ]
             }
           ]

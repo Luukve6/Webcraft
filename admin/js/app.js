@@ -121,12 +121,13 @@ async function enter(config, token) {
 function navItems(config) {
   const f = config.features;
   const col = (c) => [`#/c/${c.name}`, c.label, c.icon];
+  // Volgorde: Overzicht, Algemeen (instellingen, of een collectie met "pinned": true), Pagina's, de rest.
+  // De tegels op het Overzicht volgen dezelfde volgorde.
   return [
-    // Algemeen (instellingen van de website, of een collectie met "pinned": true) staat helemaal bovenaan
+    ['#/', 'Overzicht', 'dashboard'],
     f.settings ? ['#/settings', 'Algemeen', 'settings'] : null,
     ...config.collections.filter((c) => c.pinned).map(col),
-    ['#/', 'Overzicht', 'dashboard'],
-    f.pages ? ['#/pages', 'Pagina’s', 'page'] : null, // direct onder Overzicht
+    f.pages ? ['#/pages', 'Pagina’s', 'page'] : null,
     ...config.collections.filter((c) => !c.pinned).map(col),
     f.posts ? ['#/posts', 'Berichten', 'post'] : null,
     f.media ? ['#/media', 'Foto’s', 'image'] : null,
