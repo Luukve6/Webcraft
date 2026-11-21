@@ -20,7 +20,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sanitizeHtml, escapeHtml, htmlToText } from '../admin/js/lib/sanitize.js';
-import { parseItem, normalizeSite, formatDateNl, RESERVED_SLUGS, STATUS } from '../admin/js/lib/content.js';
+import { parseItem, normalizeSite, formatDateNl, RESERVED_SLUGS, STATUS, phoneHref, directionsHref, SOCIALS } from '../admin/js/lib/content.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -33,6 +33,27 @@ export function render(tpl, data) {
 }
 
 /** Zet adressen die met "/" beginnen om naar BASE_PATH + adres. */
+/** Contactgegevens en sociale media voor onderaan elke pagina (leeg als er niets is ingevuld). */
+export function contactHtml(site) {
+  const e = escapeHtml;
+  const parts = [];
+  const place = [site.postcode, site.city].filter(Boolean).join(' ');
+  if (site.address || place) {
+    const lines = [site.address, place].filter(Boolean).map(e).join('<br>');
+    const route = directionsHref(site);
+    parts.push(`<address class="contact-address">${lines}${route ? `<br><a href="${e(route)}" target="_blank" rel="noopener">Route plannen</a>` : ''}</address>`);
+  }
+  const reach = [];
+  const tel = phoneHref(site.phone);
+  if (tel) reach.push(`<a href="${e(tel)}">${e(site.phone)}</a>`);
+  if (site.email) reach.push(`<a href="mailto:${e(site.email)}">${e(site.email)}</a>`);
+  if (reach.length) parts.push(`<p class="contact-reach">${reach.join('<br>')}</p>`);
+  const socials = SOCIALS.filter((x) => /^https?:\/\//.test(site[x.key] || ''))
+    .map((x) => `<li><a href="${e(site[x.key])}" target="_blank" rel="noopener">${x.label}</a></li>`);
+  if (socials.length) parts.push(`<ul class="contact-social" aria-label="Sociale media">${socials.join('')}</ul>`);
+  return parts.length ? `<div class="site-contact">${parts.join('')}</div>` : '';
+}
+
 export function withBasePath(html, basePath) {
   if (!basePath) return html;
   return html.replace(/(\s(?:href|src)=")\/(?!\/)/g, `$1${basePath}/`);
@@ -120,9 +141,10 @@ export async function build({ root = ROOT, out = path.join(root, '_site'), baseP
       : '';
 
   const footer = site.footer || `© ${new Date().getFullYear()} ${site.title}`;
+  const contact = contactHtml(site);
   const layout = (data) =>
     render(tpl.layout, {
-      site, basePath: bp, footer,
+      site, basePath: bp, footer, contact,
       pageTitle: data.title && data.title !== site.title ? `${data.title} – ${site.title}` : site.title,
       description: data.description || site.description,
       menu: menu(data.activeKey),

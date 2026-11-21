@@ -104,10 +104,25 @@ export const DEFAULT_SITE = {
   blogTitle: 'Nieuws',
   postsOnHome: 3,
   footer: '',
+  // Contactgegevens en sociale media (onderaan elke pagina). Bel- en routelink worden hieruit gemaakt.
+  address: '',
+  postcode: '',
+  city: '',
+  phone: '',
+  email: '',
+  facebook: '',
+  instagram: '',
+  linkedin: '',
 };
+
+// Velden van een eerdere versie die nu automatisch worden gemaakt
+const OLD_SITE_FIELDS = ['phoneLink', 'directionsUrl', 'mapsUrl'];
 
 export function normalizeSite(raw = {}) {
   const s = { ...DEFAULT_SITE, ...raw };
+  if (!s.phone && raw.phoneDisplay) s.phone = raw.phoneDisplay;
+  delete s.phoneDisplay;
+  for (const k of OLD_SITE_FIELDS) delete s[k];
   s.postsOnHome = Math.max(0, Math.min(20, parseInt(s.postsOnHome, 10) || 0));
   s.showBlogInMenu = Boolean(s.showBlogInMenu);
   return s;
@@ -120,4 +135,57 @@ export function formatDateNl(value) {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value || ''));
   if (!m) return '';
   return `${parseInt(m[3], 10)} ${MONTHS[parseInt(m[2], 10) - 1]} ${m[1]}`;
+}
+
+// ---------- Contactgegevens ----------
+
+/** "0318 12 34 56" -> "tel:+31318123456"; "" als er geen bruikbaar nummer in staat. */
+export function phoneHref(value) {
+  let d = String(value || '').replace(/[^\d+]/g, '');
+  if (d.startsWith('00')) d = '+' + d.slice(2);
+  else if (d.startsWith('0')) d = '+31' + d.slice(1);
+  else if (d && !d.startsWith('+')) d = '+' + d;
+  return /^\+\d{8,15}$/.test(d) ? 'tel:' + d : '';
+}
+
+/** "1234ab" -> "1234 AB" (Nederlandse postcode); andere invoer blijft zoals hij is. */
+export function normalizePostcode(value) {
+  const v = String(value || '').trim();
+  const m = /^(\d{4})\s*([a-z]{2})$/i.exec(v);
+  return m ? `${m[1]} ${m[2].toUpperCase()}` : v;
+}
+
+/**
+ * Een webadres zoals mensen het typen ("facebook.com/zaak", "www.x.nl") -> "https://...".
+ * Geeft null terug als het geen geldig adres is, "" als het leeg is.
+ * Met `host` (bijv. "facebook.com") moet het adres ook echt bij die site horen.
+ */
+export function normalizeWebUrl(value, host) {
+  let v = String(value || '').trim();
+  if (!v) return '';
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+  let u;
+  try { u = new URL(v); } catch { return null; }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+  if (!u.hostname.includes('.')) return null;
+  if (host && !(u.hostname === host || u.hostname.endsWith('.' + host))) return null;
+  return u.href;
+}
+
+/** Eenvoudige controle van een e-mailadres. */
+export function isEmail(value) {
+  return /^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i.test(String(value || '').trim());
+}
+
+export const SOCIALS = [
+  { key: 'facebook', label: 'Facebook', host: 'facebook.com' },
+  { key: 'instagram', label: 'Instagram', host: 'instagram.com' },
+  { key: 'linkedin', label: 'LinkedIn', host: 'linkedin.com' },
+];
+
+/** Link naar de route in Google Maps, gemaakt uit het adres. */
+export function directionsHref(site) {
+  const parts = [site.address, [site.postcode, site.city].filter(Boolean).join(' ')].filter(Boolean);
+  if (!site.address || !site.city) return '';
+  return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(parts.join(', '));
 }

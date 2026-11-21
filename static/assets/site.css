@@ -48,3 +48,9 @@ h1 { font-size: 2.1rem; margin: 0 0 .6em; }
   .card.has-image { grid-template-columns: 220px 1fr; }
   .card.has-image img { height: 100%; aspect-ratio: auto; }
 }
+/* Contactgegevens onderaan (uit Instellingen) */
+.site-contact { display: flex; flex-wrap: wrap; gap: 12px 40px; margin-bottom: 14px; }
+.site-contact address { font-style: normal; }
+.site-contact p { margin: 0; }
+.site-contact a { color: inherit; }
+.contact-social { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; align-content: flex-start; }
