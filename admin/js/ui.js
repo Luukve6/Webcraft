@@ -64,7 +64,28 @@ const ICONS = {
   download: 'M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z',
   grip: 'M9 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm9-13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z',
   sun: 'M6.8 4.8 5 3 3.6 4.4l1.8 1.8 1.4-1.4zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7 1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91 1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z',
+  pencil: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+  trash: 'M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+  eye: 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
 };
+
+// ---------- Actieknoppen (bewerken / verwijderen) ----------
+
+/** Grijs knopje met potloodje: "Bewerken" (een link). */
+export function editAction(href, label = 'Bewerken', title) {
+  return h('a', { class: 'act act-edit', href, title }, icon('pencil', 16), h('span', {}, label));
+}
+
+/** Grijs knopje met oogje: "Bekijken" op de website (nieuw tabblad). */
+export function viewAction(href, label = 'Bekijken') {
+  return h('a', { class: 'act act-view', href, target: '_blank', rel: 'noopener' }, icon('eye', 16), h('span', {}, label));
+}
+
+/** Rood knopje met prullenbakje: "Verwijderen". */
+export function deleteAction(onclick, label = 'Verwijderen', { ariaLabel, iconOnly = false } = {}) {
+  return h('button', { type: 'button', class: `act act-delete${iconOnly ? ' act-icon' : ''}`, onclick, 'aria-label': ariaLabel || label, title: iconOnly ? label : undefined },
+    icon('trash', 16), iconOnly ? null : h('span', {}, label));
+}
 
 export function icon(name, size = 20) {
   const ns = 'http://www.w3.org/2000/svg';

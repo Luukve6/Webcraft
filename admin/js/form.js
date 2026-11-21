@@ -1,6 +1,6 @@
 // Bouwt een formulier uit de velden van een collectie (zie lib/schema.js).
 
-import { h, field as fieldWrap, setFieldError, fill, dragHandle, makeSortable } from './ui.js';
+import { h, field as fieldWrap, setFieldError, fill, dragHandle, makeSortable, deleteAction } from './ui.js';
 import { defaultValue, parseNumber, formatEuro, fillTemplate, uploadTarget, dateWindowText } from './lib/schema.js';
 
 let uid = 0;
@@ -234,7 +234,7 @@ function renderSimpleList(f, value, key, ctx) {
       input.addEventListener('input', () => { row.value = input.value; });
       row.input = input;
       const li = h('li', { class: 'simple-row' }, dragHandle(`${cap(single)} ${i + 1}`), input,
-        h('button', { type: 'button', class: 'btn btn-small btn-icon btn-danger-outline', title: 'Verwijderen', 'aria-label': `${cap(single)} ${i + 1} verwijderen`, onclick: () => { rows.splice(i, 1); rerender(Math.min(i, rows.length - 1)); ctx.changed(); } }, '✕'),
+        deleteAction(() => { rows.splice(i, 1); rerender(Math.min(i, rows.length - 1)); ctx.changed(); }, 'Verwijderen', { ariaLabel: `${cap(single)} ${i + 1} verwijderen`, iconOnly: true }),
         h('p', { class: 'field-error', hidden: true }));
       ctx.registry.push({ key: `${key}.${i}`, wrapper: li });
       return li;
@@ -282,7 +282,7 @@ function renderObjectList(f, value, key, ctx) {
         h('summary', {}, dragHandle(summaryText.textContent || `${cap(single)} ${i + 1}`), summaryText),
         h('div', { class: 'object-body' }, part.el,
           f.allowAdd ? h('div', { class: 'btn-row' },
-            h('button', { type: 'button', class: 'btn btn-small btn-danger-outline', onclick: () => { rows.splice(i, 1); rerender(); ctx.changed(); } }, `${cap(single)} verwijderen`)) : null));
+            deleteAction(() => { rows.splice(i, 1); rerender(); ctx.changed(); }, `${cap(single)} verwijderen`)) : null));
       return det;
     }));
     if (focusIndex !== null && listEl.children[focusIndex]) {

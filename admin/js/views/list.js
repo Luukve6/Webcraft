@@ -1,6 +1,6 @@
 // Overzicht van alle pagina's of berichten.
 
-import { h, clear, icon, toast, confirmDialog, statusBadge, timeAgo, dragHandle, makeSortable, moveInArray, createDelayedSaver } from '../ui.js';
+import { h, clear, icon, toast, confirmDialog, statusBadge, timeAgo, dragHandle, makeSortable, moveInArray, createDelayedSaver, editAction, viewAction, deleteAction } from '../ui.js';
 import { TYPES, formatDateNl } from '../lib/content.js';
 import { pagePath } from '../lib/paths.js';
 
@@ -111,9 +111,9 @@ export function listView(ctx, type) {
         h('td', { class: 'col-title' },
           h('a', { href: editHref, class: 'row-title' }, item.title || '(zonder titel)'),
           h('div', { class: 'row-actions' },
-            h('a', { href: editHref }, 'Bewerken'),
-            live ? h('a', { href: live, target: '_blank', rel: 'noopener' }, 'Bekijken') : null,
-            item.fixed ? null : h('button', { type: 'button', class: 'link-danger', onclick: () => remove(item) }, 'Verwijderen'))),
+            editAction(editHref),
+            live ? viewAction(live) : null,
+            item.fixed ? null : deleteAction(() => remove(item), 'Verwijderen', { ariaLabel: `"${item.title}" verwijderen` }))),
         h('td', { 'data-label': 'Status' }, statusBadge(item.status), item.fixed ? h('span', { class: 'badge', title: 'Bestaande pagina met een eigen ontwerp' }, ' vaste pagina') : null,
           type === 'pages' && !item.inMenu ? h('span', { class: 'badge' }, ' niet in menu') : null),
         h('td', { 'data-label': 'Adres', class: 'muted' }, type === 'posts' ? `/blog/${item.slug}/` : (item.slug === store.site.homepage ? '/ (homepagina)' : pagePath(ctx.config, item.slug))),

@@ -1,6 +1,6 @@
 // Bewerkscherm voor een pagina of bericht.
 
-import { h, icon, toast, modal, confirmDialog, field, setFieldError, statusBadge, timeAgo, fill, clear } from '../ui.js';
+import { h, icon, toast, modal, confirmDialog, field, setFieldError, statusBadge, timeAgo, fill, clear, deleteAction } from '../ui.js';
 import { TYPES, normalizeItem, validateItem, slugify } from '../lib/content.js';
 import { ConflictError } from '../lib/github.js';
 import { createEditor } from '../editor.js';
@@ -116,7 +116,7 @@ export function editView(ctx, type, slug) {
   const draftBtn = h('button', { type: 'button', class: 'btn btn-block', onclick: () => save('draft') });
   const previewBtn = h('button', { type: 'button', class: 'btn btn-block btn-ghost', onclick: preview }, 'Voorbeeld bekijken');
   if (fixed) { draftBtn.hidden = true; draftBtn.style.display = 'none'; }
-  const deleteBtn = existing && !fixed ? h('button', { type: 'button', class: 'link-danger', onclick: remove }, `${cap(t.single)} verwijderen`) : null;
+  const deleteBtn = existing && !fixed ? deleteAction(remove, `${cap(t.single)} verwijderen`) : null;
 
   function updateStatus() {
     fill(statusLine, 

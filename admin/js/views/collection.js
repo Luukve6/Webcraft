@@ -1,6 +1,6 @@
 // Overzicht en formulier voor collecties (eigen soorten inhoud uit config.json).
 
-import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray, createDelayedSaver } from '../ui.js';
+import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray, createDelayedSaver, editAction, deleteAction } from '../ui.js';
 import { ConflictError } from '../lib/github.js';
 import { buildForm } from '../form.js';
 import { validateData, mergeData, entryId, entryTitle, sortEntries, formatEuro, defaultData, referenceErrors, reorderValues, nextOrderValue } from '../lib/schema.js';
@@ -116,8 +116,8 @@ export function collectionListView(ctx, name) {
         ? h('td', { class: 'col-title', 'data-label': c.label },
           h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'),
           i === 0 ? h('div', { class: 'row-actions' },
-            h('a', { href }, 'Bewerken'),
-            col.allowDelete ? h('button', { type: 'button', class: 'link-danger', onclick: () => remove(entry) }, 'Verwijderen') : null) : null)
+            editAction(href),
+            col.allowDelete ? deleteAction(() => remove(entry), 'Verwijderen', { ariaLabel: `"${entryTitle(col, entry.data, entry.id)}" verwijderen` }) : null) : null)
         : h('td', { 'data-label': c.label, class: c.format === 'euro' ? 'num' : 'muted' }, columnText(c, entry.data)))));
   }
 
@@ -195,7 +195,7 @@ export function collectionEditView(ctx, name, id) {
     ? h('a', { class: 'btn btn-block', href: ctx.siteUrl() + col.previewUrl, target: '_blank', rel: 'noopener' }, icon('external', 16), 'Bekijk op de website')
     : null;
   const deleteBtn = !isFile && entry && col.allowDelete
-    ? h('button', { type: 'button', class: 'btn btn-danger-outline btn-block', onclick: () => remove() }, `${cap(col.labelSingular)} verwijderen`)
+    ? deleteAction(() => remove(), `${cap(col.labelSingular)} verwijderen`)
     : null;
 
   function updateStatus() {
