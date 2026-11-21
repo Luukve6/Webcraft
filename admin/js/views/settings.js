@@ -1,4 +1,4 @@
-// Instellingen van de website (content/site.json).
+// Algemeen: instellingen van de website (content/site.json).
 
 import { h, toast, field, setFieldError } from '../ui.js';
 import { ConflictError } from '../lib/github.js';
@@ -106,15 +106,15 @@ export function settingsView(ctx) {
       await store.saveSite(data);
       dirty = false;
       unsaved.hidden = true;
-      toast('Instellingen opgeslagen. Over ongeveer een minuut staat het op de website.', 'success');
+      toast('Opgeslagen. Over ongeveer een minuut staat het op de website.', 'success');
     } catch (e2) {
-      toast(e2 instanceof ConflictError ? 'De instellingen zijn intussen elders gewijzigd. Klik op "Vernieuwen" en probeer opnieuw.' : 'Opslaan mislukt: ' + e2.message, 'error', 10000);
+      toast(e2 instanceof ConflictError ? 'Deze gegevens zijn intussen elders gewijzigd. Klik op "Vernieuwen" en probeer opnieuw.' : 'Opslaan mislukt: ' + e2.message, 'error', 10000);
     } finally {
       saveBtn.disabled = false;
       ctx.setSaving(false);
     }
   } },
-  h('h2', {}, 'Algemeen'),
+  h('h2', {}, 'Website'),
   fields.title,
   field({ label: 'Korte omschrijving', input: description, optional: true, help: 'Wordt gebruikt door zoekmachines.' }),
   fields.url,
@@ -136,7 +136,7 @@ export function settingsView(ctx) {
   h('div', { class: 'btn-row' }, saveBtn, unsaved));
 
   return {
-    el: h('div', { class: 'view' }, h('div', { class: 'view-header' }, h('h1', {}, 'Instellingen')), form),
+    el: h('div', { class: 'view' }, h('div', { class: 'view-header' }, h('h1', {}, 'Algemeen')), form),
     canLeave: () => !dirty,
   };
 }

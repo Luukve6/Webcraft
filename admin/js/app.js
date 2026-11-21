@@ -120,13 +120,16 @@ async function enter(config, token) {
 
 function navItems(config) {
   const f = config.features;
+  const col = (c) => [`#/c/${c.name}`, c.label, c.icon];
   return [
+    // Algemeen (instellingen van de website, of een collectie met "pinned": true) staat helemaal bovenaan
+    f.settings ? ['#/settings', 'Algemeen', 'settings'] : null,
+    ...config.collections.filter((c) => c.pinned).map(col),
     ['#/', 'Overzicht', 'dashboard'],
-    f.pages ? ['#/pages', 'Pagina’s', 'page'] : null, // altijd bovenaan, direct onder Overzicht
-    ...config.collections.map((c) => [`#/c/${c.name}`, c.label, c.icon]),
+    f.pages ? ['#/pages', 'Pagina’s', 'page'] : null, // direct onder Overzicht
+    ...config.collections.filter((c) => !c.pinned).map(col),
     f.posts ? ['#/posts', 'Berichten', 'post'] : null,
     f.media ? ['#/media', 'Foto’s', 'image'] : null,
-    f.settings ? ['#/settings', 'Instellingen', 'settings'] : null,
     ['#/help', 'Hulp', 'help'],
   ].filter(Boolean);
 }
@@ -305,7 +308,7 @@ class Shell {
       else view = listView(this.ctx, section);
       document.title = section === 'pages' ? 'Pagina’s' : 'Berichten';
     } else if (section === 'media' && f.media) { active = '#/media'; view = mediaView(this.ctx); document.title = 'Foto’s'; }
-    else if (section === 'settings' && f.settings) { active = '#/settings'; view = settingsView(this.ctx); document.title = 'Instellingen'; }
+    else if (section === 'settings' && f.settings) { active = '#/settings'; view = settingsView(this.ctx); document.title = 'Algemeen'; }
     else if (section === 'help') { active = '#/help'; view = helpView(this.ctx); document.title = 'Hulp'; }
     else {
       view = { el: h('div', { class: 'view' }, h('h1', {}, 'Pagina niet gevonden'), h('a', { class: 'btn', href: '#/' }, 'Naar het overzicht')) };

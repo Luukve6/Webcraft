@@ -232,6 +232,7 @@ Instellingen per collectie (map):
 - `slug` bepaalt de bestandsnaam van een nieuw item, bijvoorbeeld `"{nummer}-{naam}"`.
 - `titleField` is het veld met de naam van een item, en `columns` zijn de kolommen in de lijst.
 - `sortBy` bepaalt de volgorde en `groupBy` groepeert de lijst, bijvoorbeeld per rubriek.
+- `pinned: true`: het onderdeel staat helemaal bovenaan in het menu (zoals Algemeen).
 - `orderField` (bijv. `"volgorde"`): de volgorde verander je door rijen in de lijst te slepen (per groep). Maak het veld
   zelf `"widget": "hidden"`; een nieuw item komt vanzelf achteraan in zijn groep.
 - Lijsten in een formulier (bijv. categorieën of gerechten van een menu) hebben links een sleepgreep. Pagina's

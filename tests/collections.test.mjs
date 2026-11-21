@@ -30,8 +30,8 @@ test('parseNumber leest getallen zoals mensen ze typen', () => {
 
 test('collecties uit de voorbeeldconfiguratie zijn geldig', () => {
   const cols = normalizeCollections(KB_CONFIG.collections);
-  assert.deepEqual(cols.map((c) => c.name), ['gerechten', 'categorieen', 'afhaallijst', 'maandmenu', 'openingstijden', 'vakantie', 'buffet', 'catering']);
-  const g = cols[0];
+  assert.deepEqual(cols.map((c) => c.name), ['algemeen', 'gerechten', 'categorieen', 'afhaallijst', 'maandmenu', 'openingstijden', 'vakantie', 'buffet', 'catering']);
+  const g = cols.find((c) => c.name === 'gerechten');
   assert.equal(g.kind, 'folder');
   assert.equal(g.allowCreate, true);
   assert.equal(cols[2].kind, 'file');
@@ -49,7 +49,7 @@ test('normalizeCollections geeft duidelijke fouten', () => {
 
 test('validateData: verplicht, getallen, patronen, lijsten en geneste velden', () => {
   const cols = normalizeCollections(KB_CONFIG.collections);
-  const g = cols[0];
+  const g = cols.find((c) => c.name === 'gerechten');
   const open = cols.find((c) => c.name === 'openingstijden');
   const errs = validateData(g.fields, { naam: '', nummer: '5', prijs: NaN, categorie: '', labels: [], volgorde: null });
   assert.deepEqual(Object.keys(errs).sort(), ['categorie', 'naam', 'prijs']);
@@ -79,7 +79,7 @@ test('mergeData bewaart velden die niet in het formulier staan en voegt geen leg
 });
 
 test('bestandsnaam, sjablonen en sorteren zoals de menukaart', () => {
-  const [g] = normalizeCollections(KB_CONFIG.collections);
+  const g = normalizeCollections(KB_CONFIG.collections).find((c) => c.name === 'gerechten');
   assert.equal(entryId(g, { nummer: 'K12', naam: 'Kanton koe low kai' }), 'k12-kanton-koe-low-kai');
   assert.equal(entryId(g, { nummer: '46A', naam: 'Nasi of bami met ½ kipfilet' }), '46a-nasi-of-bami-met-half-kipfilet');
   assert.equal(fillTemplate('{label}: {open}', { label: 'Ma', open: null }), 'Ma: ');
