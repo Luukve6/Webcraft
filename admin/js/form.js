@@ -219,6 +219,21 @@ function reorderRows(rows, from, to, rerender, keyboard, listEl) {
   if (keyboard) listEl.children[to]?.querySelector('.drag-handle')?.focus();
 }
 
+/** Pijltjes omhoog/omlaag (naast de sleepgreep), voor wie liever klikt dan sleept. */
+function moveArrows(rows, i, listEl, rerender, label) {
+  const move = (dir) => (e) => {
+    e.preventDefault(); e.stopPropagation(); // niet het blok open/dicht klappen
+    const to = i + dir;
+    if (to < 0 || to >= rows.length) return;
+    [rows[i], rows[to]] = [rows[to], rows[i]];
+    rerender();
+    listEl.children[to]?.querySelector(dir < 0 ? '.move-up' : '.move-down')?.focus();
+  };
+  return h('span', { class: 'move-arrows' },
+    h('button', { type: 'button', class: 'move-btn move-up', title: 'Omhoog', 'aria-label': `${label} omhoog`, disabled: i === 0, onclick: move(-1) }, '↑'),
+    h('button', { type: 'button', class: 'move-btn move-down', title: 'Omlaag', 'aria-label': `${label} omlaag`, disabled: i === rows.length - 1, onclick: move(1) }, '↓'));
+}
+
 /** Lijst met losse tekstregels (bijv. gerechten van het maandmenu). */
 function renderSimpleList(f, value, key, ctx) {
   const single = f.labelSingular || 'regel';
@@ -234,6 +249,7 @@ function renderSimpleList(f, value, key, ctx) {
       input.addEventListener('input', () => { row.value = input.value; });
       row.input = input;
       const li = h('li', { class: 'simple-row' }, dragHandle(`${cap(single)} ${i + 1}`), input,
+        moveArrows(rows, i, listEl, rerender, `${cap(single)} ${i + 1}`),
         deleteAction(() => { rows.splice(i, 1); rerender(Math.min(i, rows.length - 1)); ctx.changed(); }, 'Verwijderen', { ariaLabel: `${cap(single)} ${i + 1} verwijderen`, iconOnly: true }),
         h('p', { class: 'field-error', hidden: true }));
       ctx.registry.push({ key: `${key}.${i}`, wrapper: li });
@@ -279,7 +295,8 @@ function renderObjectList(f, value, key, ctx) {
       };
       updateSummary();
       const det = h('details', { class: 'object-item', open: row.open, ontoggle: () => { row.open = det.open; }, oninput: updateSummary, onchange: updateSummary },
-        h('summary', {}, dragHandle(summaryText.textContent || `${cap(single)} ${i + 1}`), summaryText),
+        h('summary', {}, dragHandle(summaryText.textContent || `${cap(single)} ${i + 1}`), summaryText,
+          moveArrows(rows, i, listEl, rerender, summaryText.textContent || `${cap(single)} ${i + 1}`)),
         h('div', { class: 'object-body' }, part.el,
           f.allowAdd ? h('div', { class: 'btn-row' },
             deleteAction(() => { rows.splice(i, 1); rerender(); ctx.changed(); }, `${cap(single)} verwijderen`)) : null));
