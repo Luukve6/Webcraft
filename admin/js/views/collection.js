@@ -113,12 +113,12 @@ export function collectionListView(ctx, name) {
     return h('tr', { 'data-id': entry.id },
       sortable ? h('td', { class: 'col-drag' }, dragHandle(`"${entryTitle(col, entry.data, entry.id)}"`)) : null,
       ...columns.map((c, i) => (i === 0 || c.field === titleField
-        ? h('td', { class: 'col-title', 'data-label': c.label },
-          h('div', { class: 'title-line' }, h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'),
-          i === 0 ? h('div', { class: 'row-actions' },
-            editAction(href),
-            col.allowDelete ? deleteAction(() => remove(entry), 'Verwijderen', { ariaLabel: `"${entryTitle(col, entry.data, entry.id)}" verwijderen` }) : null) : null))
-        : h('td', { 'data-label': c.label, class: c.format === 'euro' ? 'num' : 'muted' }, columnText(c, entry.data)))));
+        ? h('td', { class: 'col-title', 'data-label': c.label }, h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'))
+        : h('td', { 'data-label': c.label, class: c.format === 'euro' ? 'num' : 'muted' }, columnText(c, entry.data)))),
+      // Knoppen helemaal rechts in de rij
+      h('td', { class: 'col-actions' }, h('div', { class: 'row-actions' },
+        editAction(href),
+        col.allowDelete ? deleteAction(() => remove(entry), 'Verwijderen', { ariaLabel: `"${entryTitle(col, entry.data, entry.id)}" verwijderen` }) : null)));
   }
 
   function render() {
@@ -131,9 +131,10 @@ export function collectionListView(ctx, name) {
     // Slepen kan niet tijdens zoeken (dan zie je niet alle rijen)
     sortable = Boolean(orderField) && !query;
     if (orderHint) orderHint.textContent = sortable ? 'Sleep een rij aan het greepje links om de volgorde op de website te veranderen.' : 'Maak het zoekveld leeg om de volgorde te veranderen.';
-    const span = columns.length + (sortable ? 1 : 0);
+    const span = columns.length + 1 + (sortable ? 1 : 0);
     fill(thead, h('tr', {}, sortable ? h('th', { class: 'col-drag', scope: 'col' }, h('span', { class: 'sr-only' }, 'Verplaatsen')) : null,
-      columns.map((c) => h('th', { scope: 'col', class: c.format === 'euro' ? 'num' : null }, c.label))));
+      columns.map((c) => h('th', { scope: 'col', class: c.format === 'euro' ? 'num' : null }, c.label)),
+      h('th', { scope: 'col', class: 'col-actions' }, h('span', { class: 'sr-only' }, 'Acties'))));
     const bodies = [];
     const body = (list, label, header) => {
       const tb = h('tbody', {}, header || null, ...list.map(row));
