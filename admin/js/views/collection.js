@@ -114,10 +114,10 @@ export function collectionListView(ctx, name) {
       sortable ? h('td', { class: 'col-drag' }, dragHandle(`"${entryTitle(col, entry.data, entry.id)}"`)) : null,
       ...columns.map((c, i) => (i === 0 || c.field === titleField
         ? h('td', { class: 'col-title', 'data-label': c.label },
-          h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'),
+          h('div', { class: 'title-line' }, h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'),
           i === 0 ? h('div', { class: 'row-actions' },
             editAction(href),
-            col.allowDelete ? deleteAction(() => remove(entry), 'Verwijderen', { ariaLabel: `"${entryTitle(col, entry.data, entry.id)}" verwijderen` }) : null) : null)
+            col.allowDelete ? deleteAction(() => remove(entry), 'Verwijderen', { ariaLabel: `"${entryTitle(col, entry.data, entry.id)}" verwijderen` }) : null) : null))
         : h('td', { 'data-label': c.label, class: c.format === 'euro' ? 'num' : 'muted' }, columnText(c, entry.data)))));
   }
 
