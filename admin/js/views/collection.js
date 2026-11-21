@@ -1,6 +1,6 @@
 // Overzicht en formulier voor collecties (eigen soorten inhoud uit config.json).
 
-import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray, createDelayedSaver, editAction, deleteAction } from '../ui.js';
+import { h, fill, icon, toast, confirmDialog, modal, dragHandle, makeSortable, moveInArray, createDelayedSaver, editAction, deleteAction, moveArrows } from '../ui.js';
 import { ConflictError } from '../lib/github.js';
 import { buildForm } from '../form.js';
 import { validateData, mergeData, entryId, entryTitle, sortEntries, formatEuro, defaultData, referenceErrors, reorderValues, nextOrderValue } from '../lib/schema.js';
@@ -63,7 +63,7 @@ export function collectionListView(ctx, name) {
   });
 
   function showOrderState(state, err) {
-    if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder slepen.';
+    if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder schuiven.';
     else if (state === 'saving') orderStatus.textContent = 'Bezig met opslaan…';
     else if (state === 'saved') { orderStatus.textContent = ''; toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success'); }
     else if (state === 'error') { orderStatus.textContent = ''; toast('Volgorde opslaan mislukt: ' + err.message, 'error', 10000); render(); }
@@ -99,19 +99,27 @@ export function collectionListView(ctx, name) {
   }
 
   /** Na slepen: nieuwe volgorde van `list` (de rijen van één groep) opslaan in één commit. */
-  function reorder(list, from, to, keyboard) {
+  /** focus: welke knop daarna weer de focus krijgt ('.drag-handle', '.move-up', '.move-down') */
+  function reorder(list, from, to, focus) {
+    if (to < 0 || to >= list.length) return;
     const ordered = moveInArray(list, from, to);
     const id = ordered[to].id;
     for (const c of reorderValues(ordered, orderField)) pending.set(c.id, c.data[orderField]);
     render();
-    if (keyboard) table.querySelector(`tr[data-id="${CSS.escape(id)}"] .drag-handle`)?.focus();
+    if (focus) {
+      const row = table.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
+      const el = row?.querySelector(focus);
+      (el && !el.disabled ? el : row?.querySelector('.drag-handle'))?.focus();
+    }
     saver.schedule();
   }
 
-  function row(entry) {
+  function row(entry, i, list) {
     const href = `#/c/${name}/edit/${encodeURIComponent(entry.id)}`;
+    const label = `"${entryTitle(col, entry.data, entry.id)}"`;
     return h('tr', { 'data-id': entry.id },
-      sortable ? h('td', { class: 'col-drag' }, dragHandle(`"${entryTitle(col, entry.data, entry.id)}"`)) : null,
+      sortable ? h('td', { class: 'col-drag' }, h('div', { class: 'drag-cell' }, dragHandle(label),
+        list && list.length > 1 ? moveArrows(i, list.length, (dir) => reorder(list, i, i + dir, dir < 0 ? '.move-up' : '.move-down'), label) : null)) : null,
       ...columns.map((c, i) => (i === 0 || c.field === titleField
         ? h('td', { class: 'col-title', 'data-label': c.label }, h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'))
         : h('td', { 'data-label': c.label, class: c.format === 'euro' ? 'num' : 'muted' }, columnText(c, entry.data)))),
@@ -130,15 +138,15 @@ export function collectionListView(ctx, name) {
     countEl.textContent = entries.length === total ? `${total} ${total === 1 ? col.labelSingular : col.labelPlural || col.label.toLowerCase()}` : `${entries.length} van de ${total}`;
     // Slepen kan niet tijdens zoeken (dan zie je niet alle rijen)
     sortable = Boolean(orderField) && !query;
-    if (orderHint) orderHint.textContent = sortable ? 'Sleep een rij aan het greepje links om de volgorde op de website te veranderen.' : 'Maak het zoekveld leeg om de volgorde te veranderen.';
+    if (orderHint) orderHint.textContent = sortable ? 'Sleep een rij aan het greepje links, of gebruik de pijltjes, om de volgorde op de website te veranderen.' : 'Maak het zoekveld leeg om de volgorde te veranderen.';
     const span = columns.length + 1 + (sortable ? 1 : 0);
     fill(thead, h('tr', {}, sortable ? h('th', { class: 'col-drag', scope: 'col' }, h('span', { class: 'sr-only' }, 'Verplaatsen')) : null,
       columns.map((c) => h('th', { scope: 'col', class: c.format === 'euro' ? 'num' : null }, c.label)),
       h('th', { scope: 'col', class: 'col-actions' }, h('span', { class: 'sr-only' }, 'Acties'))));
     const bodies = [];
     const body = (list, label, header) => {
-      const tb = h('tbody', {}, header || null, ...list.map(row));
-      if (sortable && list.length > 1) makeSortable(tb, { items: 'tr[data-id]', onReorder: (from, to, o) => reorder(list, from, to, o.keyboard) });
+      const tb = h('tbody', {}, header || null, ...list.map((e, i) => row(e, i, list)));
+      if (sortable && list.length > 1) makeSortable(tb, { items: 'tr[data-id]', onReorder: (from, to, o) => reorder(list, from, to, o.keyboard ? '.drag-handle' : null) });
       return tb;
     };
     if (!entries.length) {

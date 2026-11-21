@@ -416,7 +416,6 @@ tr.is-dragging td { background: var(--accent-light); }
 @media (min-width: 783px) {
   .title-line { flex-wrap: nowrap; justify-content: space-between; }
   .table .col-title .row-actions { margin: 0; flex: none; }
-  .table .col-title { min-width: 360px; }
 }
 /* Menukaart e.d.: knoppen in een eigen kolom helemaal rechts */
 .table th.col-actions, .table td.col-actions { width: 1%; white-space: nowrap; text-align: right; }
@@ -431,8 +430,10 @@ tr.is-dragging td { background: var(--accent-light); }
 .move-arrows { display: inline-flex; gap: 4px; flex: none; }
 .object-item > summary .move-arrows { margin-left: auto; }
 .object-item > summary .move-arrows + * { margin-left: 0; }
-.move-btn { width: 30px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--text); font-weight: 700; cursor: pointer; }
-.move-btn:hover:not(:disabled) { background: var(--line-soft); }
-.move-btn:disabled { opacity: .35; cursor: default; }
+.move-btn { display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #C9CED8; border-radius: 7px; background: #fff; color: var(--text); cursor: pointer; }
+.move-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.move-btn:disabled { opacity: .3; cursor: default; }
+.drag-cell { display: flex; align-items: center; gap: 4px; }
+.table .col-drag { width: 1%; white-space: nowrap; }
 .move-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .object-item > summary:has(.move-arrows)::after { margin-left: 10px; }

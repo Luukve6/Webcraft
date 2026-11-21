@@ -1,6 +1,6 @@
 // Overzicht van alle pagina's of berichten.
 
-import { h, clear, icon, toast, confirmDialog, statusBadge, timeAgo, dragHandle, makeSortable, moveInArray, createDelayedSaver, editAction, viewAction, deleteAction } from '../ui.js';
+import { h, clear, icon, toast, confirmDialog, statusBadge, timeAgo, dragHandle, makeSortable, moveInArray, createDelayedSaver, editAction, viewAction, deleteAction, moveArrows } from '../ui.js';
 import { TYPES, formatDateNl } from '../lib/content.js';
 import { pagePath } from '../lib/paths.js';
 
@@ -36,7 +36,7 @@ export function listView(ctx, type) {
   });
 
   function showOrderState(state, err) {
-    if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder slepen.';
+    if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder schuiven.';
     else if (state === 'saving') orderStatus.textContent = 'Bezig met opslaan…';
     else if (state === 'saved') { orderStatus.textContent = ''; toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success'); }
     else if (state === 'error') { orderStatus.textContent = ''; toast('Volgorde opslaan mislukt: ' + err.message, 'error', 10000); render(); }
@@ -45,15 +45,21 @@ export function listView(ctx, type) {
   const onUnload = (e) => { if (saver.busy) { saver.flush(); e.preventDefault(); e.returnValue = ''; } };
   window.addEventListener('beforeunload', onUnload);
 
-  function reorder(from, to, keyboard) {
+  /** focus: welke knop daarna weer de focus krijgt ('.drag-handle', '.move-up', '.move-down') */
+  function reorder(from, to, focus) {
+    if (to < 0 || to >= shown.length) return;
     const ordered = moveInArray(shown, from, to);
     const slug = ordered[to].slug;
     ordered.forEach((item, i) => { const order = (i + 1) * 10; if (item.menuOrder !== order) pending.set(item.slug, order); });
     render();
-    if (keyboard) tbody.querySelector(`tr[data-id="${CSS.escape(slug)}"] .drag-handle`)?.focus();
+    if (focus) {
+      const row = tbody.querySelector(`tr[data-id="${CSS.escape(slug)}"]`);
+      const el = row?.querySelector(focus);
+      (el && !el.disabled ? el : row?.querySelector('.drag-handle'))?.focus();
+    }
     saver.schedule();
   }
-  makeSortable(tbody, { items: 'tr[data-id]', enabled: () => sortable, onReorder: (from, to, o) => reorder(from, to, o.keyboard) });
+  makeSortable(tbody, { items: 'tr[data-id]', enabled: () => sortable, onReorder: (from, to, o) => reorder(from, to, o.keyboard ? '.drag-handle' : null) });
   const counts = h('div', { class: 'filters', role: 'tablist', 'aria-label': 'Filter' });
   const search = h('input', { type: 'search', class: 'search', placeholder: `Zoek in ${t.plural}…`, 'aria-label': `Zoek in ${t.plural}`, oninput: () => { query = search.value.toLowerCase(); render(); } });
 
@@ -89,7 +95,7 @@ export function listView(ctx, type) {
 
     sortable = type === 'pages' && filter === 'all' && !query && items.length > 1;
     shown = items;
-    if (orderHint) orderHint.textContent = sortable ? 'Sleep een pagina aan het greepje links om de volgorde in het menu te veranderen.' : 'Kies "Alles" en maak het zoekveld leeg om de volgorde te veranderen.';
+    if (orderHint) orderHint.textContent = sortable ? 'Sleep een pagina aan het greepje links, of gebruik de pijltjes, om de volgorde in het menu te veranderen.' : 'Kies "Alles" en maak het zoekveld leeg om de volgorde te veranderen.';
     clear(thead);
     thead.append(h('tr', {},
       sortable ? h('th', { scope: 'col', class: 'col-drag' }, h('span', { class: 'sr-only' }, 'Verplaatsen')) : null,
@@ -103,11 +109,12 @@ export function listView(ctx, type) {
         all.length ? 'Niets gevonden.' : `Er zijn nog geen ${t.plural}. Klik op "Nieuw toevoegen" om te beginnen.`)));
     }
     const siteUrl = ctx.siteUrl();
-    for (const item of items) {
+    for (const [idx, item] of items.entries()) {
       const editHref = `#/${type}/edit/${encodeURIComponent(item.slug)}`;
       const live = item.status === 'published' && siteUrl ? ctx.publicUrl(type, item.slug) : null;
       tbody.append(h('tr', { 'data-id': item.slug },
-        sortable ? h('td', { class: 'col-drag' }, dragHandle(`"${item.title || item.slug}"`)) : null,
+        sortable ? h('td', { class: 'col-drag' }, h('div', { class: 'drag-cell' }, dragHandle(`"${item.title || item.slug}"`),
+          moveArrows(idx, items.length, (dir) => reorder(idx, idx + dir, dir < 0 ? '.move-up' : '.move-down'), `"${item.title || item.slug}"`))) : null,
         h('td', { class: 'col-title' },
           h('div', { class: 'title-line' }, h('a', { href: editHref, class: 'row-title' }, item.title || '(zonder titel)'),
           h('div', { class: 'row-actions' },

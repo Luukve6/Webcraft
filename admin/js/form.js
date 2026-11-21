@@ -1,6 +1,6 @@
 // Bouwt een formulier uit de velden van een collectie (zie lib/schema.js).
 
-import { h, field as fieldWrap, setFieldError, fill, dragHandle, makeSortable, deleteAction } from './ui.js';
+import { h, field as fieldWrap, setFieldError, fill, dragHandle, makeSortable, deleteAction, icon } from './ui.js';
 import { defaultValue, parseNumber, formatEuro, fillTemplate, uploadTarget, dateWindowText } from './lib/schema.js';
 
 let uid = 0;
@@ -230,8 +230,8 @@ function moveArrows(rows, i, listEl, rerender, label) {
     listEl.children[to]?.querySelector(dir < 0 ? '.move-up' : '.move-down')?.focus();
   };
   return h('span', { class: 'move-arrows' },
-    h('button', { type: 'button', class: 'move-btn move-up', title: 'Omhoog', 'aria-label': `${label} omhoog`, disabled: i === 0, onclick: move(-1) }, '↑'),
-    h('button', { type: 'button', class: 'move-btn move-down', title: 'Omlaag', 'aria-label': `${label} omlaag`, disabled: i === rows.length - 1, onclick: move(1) }, '↓'));
+    h('button', { type: 'button', class: 'move-btn move-up', title: 'Omhoog', 'aria-label': `${label} omhoog`, disabled: i === 0, onclick: move(-1) }, icon('arrowUp', 18)),
+    h('button', { type: 'button', class: 'move-btn move-down', title: 'Omlaag', 'aria-label': `${label} omlaag`, disabled: i === rows.length - 1, onclick: move(1) }, icon('arrowDown', 18)));
 }
 
 /** Lijst met losse tekstregels (bijv. gerechten van het maandmenu). */
