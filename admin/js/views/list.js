@@ -102,10 +102,11 @@ export function listView(ctx, type) {
       h('th', { scope: 'col' }, 'Titel'),
       h('th', { scope: 'col' }, 'Status'),
       h('th', { scope: 'col' }, 'Adres'),
-      h('th', { scope: 'col' }, type === 'posts' ? 'Datum' : 'Laatst gewijzigd')));
+      h('th', { scope: 'col' }, type === 'posts' ? 'Datum' : 'Laatst gewijzigd'),
+      h('th', { scope: 'col', class: 'col-actions' }, h('span', { class: 'sr-only' }, 'Acties'))));
     clear(tbody);
     if (!items.length) {
-      tbody.append(h('tr', {}, h('td', { colspan: 5, class: 'empty' },
+      tbody.append(h('tr', {}, h('td', { colspan: 6, class: 'empty' },
         all.length ? 'Niets gevonden.' : `Er zijn nog geen ${t.plural}. Klik op "Nieuw toevoegen" om te beginnen.`)));
     }
     const siteUrl = ctx.siteUrl();
@@ -113,18 +114,18 @@ export function listView(ctx, type) {
       const editHref = `#/${type}/edit/${encodeURIComponent(item.slug)}`;
       const live = item.status === 'published' && siteUrl ? ctx.publicUrl(type, item.slug) : null;
       tbody.append(h('tr', { 'data-id': item.slug },
-        sortable ? h('td', { class: 'col-drag' }, h('div', { class: 'drag-cell' }, dragHandle(`"${item.title || item.slug}"`),
-          moveArrows(idx, items.length, (dir) => reorder(idx, idx + dir, dir < 0 ? '.move-up' : '.move-down'), `"${item.title || item.slug}"`))) : null,
-        h('td', { class: 'col-title' },
-          h('div', { class: 'title-line' }, h('a', { href: editHref, class: 'row-title' }, item.title || '(zonder titel)'),
-          h('div', { class: 'row-actions' },
-            editAction(editHref),
-            live ? viewAction(live) : null,
-            item.fixed ? null : deleteAction(() => remove(item), 'Verwijderen', { ariaLabel: `"${item.title}" verwijderen` })))),
+        sortable ? h('td', { class: 'col-drag' }, dragHandle(`"${item.title || item.slug}"`)) : null,
+        h('td', { class: 'col-title' }, h('a', { href: editHref, class: 'row-title' }, item.title || '(zonder titel)')),
         h('td', { 'data-label': 'Status' }, statusBadge(item.status), item.fixed ? h('span', { class: 'badge', title: 'Bestaande pagina met een eigen ontwerp' }, ' vaste pagina') : null,
           type === 'pages' && !item.inMenu ? h('span', { class: 'badge' }, ' niet in menu') : null),
         h('td', { 'data-label': 'Adres', class: 'muted' }, type === 'posts' ? `/blog/${item.slug}/` : (item.slug === store.site.homepage ? '/ (homepagina)' : pagePath(ctx.config, item.slug))),
-        h('td', { 'data-label': type === 'posts' ? 'Datum' : 'Gewijzigd', class: 'muted' }, type === 'posts' ? formatDateNl(item.date) : timeAgo(item.updated))));
+        h('td', { 'data-label': type === 'posts' ? 'Datum' : 'Gewijzigd', class: 'muted' }, type === 'posts' ? formatDateNl(item.date) : timeAgo(item.updated)),
+        // Alle knoppen helemaal rechts: pijltjes, Bewerken, Bekijken, Verwijderen
+        h('td', { class: 'col-actions' }, h('div', { class: 'row-actions' },
+          sortable ? moveArrows(idx, items.length, (dir) => reorder(idx, idx + dir, dir < 0 ? '.move-up' : '.move-down'), `"${item.title || item.slug}"`) : null,
+          editAction(editHref),
+          live ? viewAction(live) : null,
+          item.fixed ? null : deleteAction(() => remove(item), 'Verwijderen', { ariaLabel: `"${item.title}" verwijderen` })))));
     }
   }
 

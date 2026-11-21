@@ -437,3 +437,7 @@ tr.is-dragging td { background: var(--accent-light); }
 .table .col-drag { width: 1%; white-space: nowrap; }
 .move-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .object-item > summary:has(.move-arrows)::after { margin-left: 10px; }
+
+/* Pijltjes in de knoppenkolom: een klein streepje ruimte tot Bewerken */
+.row-actions .move-arrows { margin-right: 6px; }
+.row-actions .move-btn { width: 30px; height: 30px; }

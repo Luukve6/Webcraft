@@ -118,13 +118,13 @@ export function collectionListView(ctx, name) {
     const href = `#/c/${name}/edit/${encodeURIComponent(entry.id)}`;
     const label = `"${entryTitle(col, entry.data, entry.id)}"`;
     return h('tr', { 'data-id': entry.id },
-      sortable ? h('td', { class: 'col-drag' }, h('div', { class: 'drag-cell' }, dragHandle(label),
-        list && list.length > 1 ? moveArrows(i, list.length, (dir) => reorder(list, i, i + dir, dir < 0 ? '.move-up' : '.move-down'), label) : null)) : null,
+      sortable ? h('td', { class: 'col-drag' }, dragHandle(label)) : null,
       ...columns.map((c, i) => (i === 0 || c.field === titleField
         ? h('td', { class: 'col-title', 'data-label': c.label }, h('a', { href, class: 'row-title' }, columnText(c, entry.data) || '(zonder naam)'))
         : h('td', { 'data-label': c.label, class: c.format === 'euro' ? 'num' : 'muted' }, columnText(c, entry.data)))),
       // Knoppen helemaal rechts in de rij
       h('td', { class: 'col-actions' }, h('div', { class: 'row-actions' },
+        sortable && list && list.length > 1 ? moveArrows(i, list.length, (dir) => reorder(list, i, i + dir, dir < 0 ? '.move-up' : '.move-down'), label) : null,
         editAction(href),
         col.allowDelete ? deleteAction(() => remove(entry), 'Verwijderen', { ariaLabel: `"${entryTitle(col, entry.data, entry.id)}" verwijderen` }) : null)));
   }
