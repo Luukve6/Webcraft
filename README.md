@@ -281,7 +281,7 @@ maak je per site; het beheer schrijft alleen de JSON-bestanden in `content/`.
 | `repo.owner`, `repo.name`, `repo.branch` | Waar de inhoud wordt opgeslagen |
 | `auth.oauthUrl` | Adres van je OAuth-Worker. Leeg = alleen inloggen met toegangssleutel |
 | `logo` | Logo van de site in het vierkantje linksboven in het beheer, bijv. `"../assets/img/logo.svg"` (adres gezien vanaf `/admin/`). Leeg = de eerste letter van `siteName` |
-| `logoFull` | `true` als het logo zelf al een vierkant icoon is (bijv. het favicon van de site): het vult dan het hele vakje, met een dun wit randje. Standaard staat het logo op een wit vlak |
+| `logoFull` | `true` als het logo zelf al een vierkant icoon is (bijv. het favicon van de site): het vult dan het hele vakje. Standaard staat het logo op een wit vlak |
 | `apiBase` | GitHub API (alleen wijzigen voor GitHub Enterprise; pas dan ook `connect-src` in `admin/index.html` aan) |
 | `siteUrl` | Adres van de website voor "Website bekijken" (kan ook via Instellingen in het beheer) |
 | `maxImageWidth` | Bredere foto's worden bij uploaden verkleind tot deze breedte (in pixels) |
