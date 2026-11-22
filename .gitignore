@@ -6,3 +6,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 dist/
+
+# Kennisgraaf van graphify (alleen lokaal)
+graphify-out/

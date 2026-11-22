@@ -101,6 +101,7 @@ body.signed-in #app { display: flex; min-height: 100vh; }
 .webcraft-link strong { color: var(--side-text); font-weight: 600; }
 .webcraft-link:hover, .webcraft-link:focus-visible { color: var(--side-text); }
 .webcraft-link:hover strong { color: var(--side-accent); }
+.webcraft-version { margin-left: auto; font-size: .72rem; font-variant-numeric: tabular-nums; opacity: .8; }
 .user { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: var(--side-muted); font-size: .9rem; }
 .user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .avatar { width: 28px; height: 28px; border-radius: 50%; }
