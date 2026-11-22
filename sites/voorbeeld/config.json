@@ -1,6 +1,7 @@
 {
   "siteName": "Restaurant De Linde",
-  "logo": "../assets/img/bloesem.svg",
+  "logo": "../favicon.svg",
+  "logoFull": true,
   "repo": {
     "owner": "jouw-github-naam",
     "name": "jouw-website",
