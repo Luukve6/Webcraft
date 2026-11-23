@@ -174,7 +174,7 @@ export function editView(ctx, type, slug) {
       item = saved.item;
       originalSlug = item.slug;
       dirty = false;
-      toast(status === 'published' ? `"${item.title}" is opgeslagen en wordt online gezet.` : `"${item.title}" is opgeslagen als concept.`, 'success');
+      toast(status === 'published' ? `"${item.title}" is opgeslagen. ${ctx.liveNote}` : `"${item.title}" is opgeslagen als concept.`, 'success');
       if (location.hash !== `#/${type}/edit/${encodeURIComponent(item.slug)}`) {
         ctx.navigate(`#/${type}/edit/${encodeURIComponent(item.slug)}`, { replace: true, force: true });
         return;

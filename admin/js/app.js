@@ -16,7 +16,8 @@ import { helpView } from './views/help.js';
 import { collectionListView, collectionEditView } from './views/collection.js';
 import { normalizeCollections } from './lib/schema.js';
 import { pagePath } from './lib/paths.js';
-import { useLocal, LOCAL_TOKEN } from './local.js';
+import { useLocal, useCloud, api, LOCAL_TOKEN } from './local.js';
+import { usersView } from './views/users.js';
 
 const app = document.getElementById('app');
 
@@ -26,6 +27,8 @@ async function loadConfig() {
   const c = await res.json();
   // Op je eigen pc (localhost + "local" in config.json): opslaan op schijf in plaats van in GitHub.
   if (useLocal(c)) Object.assign(c, { localMode: true, mock: true, mockToken: LOCAL_TOKEN });
+  // Opslaan in Cloudflare (KV), inloggen via Cloudflare Access: geen GitHub nodig.
+  else if (useCloud(c)) Object.assign(c, { cloudMode: true, mock: true, mockToken: LOCAL_TOKEN, repo: { owner: 'webcraft', name: 'site', ...(c.repo || {}) } });
   if (!c.repo || !c.repo.owner || !c.repo.name) throw new Error('Vul in admin/config.json de repository in (repo.owner en repo.name).');
   return {
     apiBase: 'https://api.github.com',
@@ -51,6 +54,16 @@ async function start() {
     config = await loadConfig();
   } catch (e) {
     showFatal(e.message);
+    return;
+  }
+
+  // Cloudflare: Access heeft al om je e-mailadres en de code gevraagd voordat /admin laadt.
+  if (config.cloudMode) {
+    try {
+      await enter(config, LOCAL_TOKEN);
+    } catch (e) {
+      showFatal(e.message);
+    }
     return;
   }
 
@@ -90,7 +103,7 @@ async function enter(config, token) {
     branch: config.repo.branch,
     apiBase: config.apiBase,
     fetch: config.demo ? await (await import('./demo.js')).demoFetch(config)
-      : config.localMode ? await (await import('./local.js')).localFetch(config)
+      : config.localMode || config.cloudMode ? await (await import('./local.js')).localFetch(config)
         : undefined,
   });
   let access;
@@ -102,13 +115,17 @@ async function enter(config, token) {
     throw e;
   }
   if (!access.canWrite) throw new Error('Je bent ingelogd, maar je hebt geen schrijfrechten op deze repository. Vraag de eigenaar om je toe te voegen.');
+  if (config.cloudMode) {
+    const ik = await api(config, 'ik');
+    access.user = { login: ik.email, name: ik.email, role: ik.rol };
+  }
 
   const loading = h('div', { class: 'loading-screen' }, h('div', { class: 'spinner', 'aria-hidden': 'true' }), h('p', {}, 'Website laden…'));
   clear(app).append(loading);
 
   const store = new Store(client, { collections: config.collections, media: config.media });
   const { errors } = await store.load();
-  const publisher = new PublishTracker(client, { hosting: config.localMode ? 'local' : config.hosting });
+  const publisher = new PublishTracker(client, { hosting: config.localMode ? 'local' : config.cloudMode ? 'kv' : config.hosting });
   client.getPagesEnabled().then((v) => { publisher.pagesEnabled = v; publisher.set(publisher.state); });
   publisher.checkLatest(store.head.commitSha);
   store.addEventListener('committed', (e) => publisher.track(e.detail.sha));
@@ -119,7 +136,7 @@ async function enter(config, token) {
   if (store.truncated) toast('De repository is erg groot; niet alle bestanden konden worden geladen.', 'error', 15000);
 }
 
-function navItems(config) {
+function navItems(config, user) {
   const f = config.features;
   const col = (c) => [`#/c/${c.name}`, c.label, c.icon];
   // Volgorde: Overzicht, Algemeen (instellingen, of een collectie met "pinned": true), Pagina's, de rest.
@@ -132,6 +149,7 @@ function navItems(config) {
     ...config.collections.filter((c) => !c.pinned).map(col),
     f.posts ? ['#/posts', 'Berichten', 'post'] : null,
     f.media ? ['#/media', 'Foto’s', 'image'] : null,
+    config.cloudMode && user && user.role === 'admin' ? ['#/users', 'Gebruikers', 'users'] : null,
     ['#/help', 'Hulp', 'help'],
   ].filter(Boolean);
 }
@@ -143,6 +161,8 @@ class Shell {
       features: ctx.config.features,
       navigate: (hash, opts) => this.navigate(hash, opts),
       setSaving: (on) => this.setSaving(on),
+      // Tekst na opslaan: in Cloudflare staat het meteen online, anders bouwt GitHub/Cloudflare de site eerst opnieuw
+      liveNote: ctx.config.cloudMode ? 'Staat meteen online.' : 'De website wordt bijgewerkt.',
       siteUrl: () => (ctx.config.demo || ctx.config.localMode ? location.origin : (ctx.store.site.url || ctx.config.siteUrl || '')).replace(/\/$/, ''),
       publicUrl: (type, slug) => {
         const base = this.ctx.siteUrl();
@@ -160,7 +180,7 @@ class Shell {
     const { user, config, publisher } = this.ctx;
     this.main = h('main', { class: 'main', id: 'main', tabindex: '-1' });
     this.nav = h('nav', { class: 'nav', 'aria-label': 'Beheermenu' },
-      h('ul', {}, navItems(config).map(([href, label, ic]) => h('li', {}, h('a', { href, dataset: { route: href } }, icon(ic), h('span', {}, label))))));
+      h('ul', {}, navItems(config, user).map(([href, label, ic]) => h('li', {}, h('a', { href, dataset: { route: href } }, icon(ic), h('span', {}, label))))));
 
     this.statusPill = h('button', { type: 'button', class: 'status-pill', title: 'Publicatiestatus', onclick: () => {
       const run = publisher.run;
@@ -175,7 +195,7 @@ class Shell {
     publisher.addEventListener('change', renderPill);
     renderPill();
 
-    const refreshBtn = h('button', { type: 'button', class: 'btn btn-small btn-ghost-light', title: 'Nieuwste versie uit GitHub laden', onclick: () => this.refresh() }, 'Vernieuwen');
+    const refreshBtn = h('button', { type: 'button', class: 'btn btn-small btn-ghost-light', title: config.cloudMode ? 'Nieuwste versie laden' : 'Nieuwste versie uit GitHub laden', onclick: () => this.refresh() }, 'Vernieuwen');
     const siteLink = () => {
       const url = this.ctx.siteUrl();
       return url ? h('a', { class: 'btn btn-small btn-ghost-light', href: url, target: '_blank', rel: 'noopener' }, icon('external', 16), 'Website bekijken') : null;
@@ -193,7 +213,8 @@ class Shell {
       h('div', { class: 'sidebar-foot' },
         h('div', { class: 'user' },
           user.avatar_url ? h('img', { src: user.avatar_url, alt: '', class: 'avatar' }) : h('span', { class: 'avatar avatar-empty' }, (user.login || '?')[0].toUpperCase()),
-          h('span', { class: 'user-name' }, user.name || user.login)),
+          h('span', { class: 'user-name' }, user.name || user.login,
+            user.role ? h('span', { class: 'user-role' }, user.role === 'admin' ? 'Admin' : 'Redacteur') : null)),
         h('button', { type: 'button', class: 'nav-btn', onclick: () => this.logout() }, icon('logout', 18), h('span', {}, 'Uitloggen')),
         h('a', { class: 'webcraft-link', href: WEBCRAFT_URL, target: '_blank', rel: 'noopener', title: `Over Webcraft (opent in een nieuw tabblad) · versie ${VERSION}` },
           h('img', { src: 'img/webcraft.svg', alt: '', width: 18, height: 18 }), h('span', {}, 'Over ', h('strong', {}, 'Webcraft')),
@@ -248,6 +269,8 @@ class Shell {
       const ok = await confirmDialog('Niet-opgeslagen wijzigingen', 'Je hebt wijzigingen die nog niet zijn opgeslagen. Toch uitloggen?', 'Uitloggen', { danger: true });
       if (!ok) return;
     }
+    // Cloudflare Access: daar uitloggen, anders ben je met één klik weer binnen
+    if (this.ctx.config.cloudMode) { location.href = '/cdn-cgi/access/logout'; return; }
     clearSession();
     try {
       for (const k of Object.keys(localStorage)) if (k.startsWith('cms.blob.')) localStorage.removeItem(k);
@@ -313,6 +336,7 @@ class Shell {
       document.title = section === 'pages' ? 'Pagina’s' : 'Berichten';
     } else if (section === 'media' && f.media) { active = '#/media'; view = mediaView(this.ctx); document.title = 'Foto’s'; }
     else if (section === 'settings' && f.settings) { active = '#/settings'; view = settingsView(this.ctx); document.title = 'Algemeen'; }
+    else if (section === 'users' && this.ctx.config.cloudMode && this.ctx.user.role === 'admin') { active = '#/users'; view = usersView(this.ctx); document.title = 'Gebruikers'; }
     else if (section === 'help') { active = '#/help'; view = helpView(this.ctx); document.title = 'Hulp'; }
     else {
       view = { el: h('div', { class: 'view' }, h('h1', {}, 'Pagina niet gevonden'), h('a', { class: 'btn', href: '#/' }, 'Naar het overzicht')) };

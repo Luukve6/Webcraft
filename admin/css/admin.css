@@ -106,7 +106,8 @@ body.signed-in #app { display: flex; min-height: 100vh; }
 .webcraft-link:hover strong { color: var(--side-accent); }
 .webcraft-version { margin-left: auto; font-size: .72rem; font-variant-numeric: tabular-nums; opacity: .8; }
 .user { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: var(--side-muted); font-size: .9rem; }
-.user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.user-role { display: block; font-size: .72rem; color: var(--side-accent); } /* Admin of Redacteur (Cloudflare-opslag) */
 .avatar { width: 28px; height: 28px; border-radius: 50%; }
 .avatar-empty { display: inline-grid; place-items: center; background: var(--side-bg-2); color: #fff; }
 

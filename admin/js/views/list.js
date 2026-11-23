@@ -38,7 +38,7 @@ export function listView(ctx, type) {
   function showOrderState(state, err) {
     if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder schuiven.';
     else if (state === 'saving') orderStatus.textContent = 'Bezig met opslaan…';
-    else if (state === 'saved') { orderStatus.textContent = ''; toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success'); }
+    else if (state === 'saved') { orderStatus.textContent = ''; toast(`Nieuwe volgorde opgeslagen. ${ctx.liveNote}`, 'success'); }
     else if (state === 'error') { orderStatus.textContent = ''; toast('Volgorde opslaan mislukt: ' + err.message, 'error', 10000); render(); }
     orderStatus.hidden = !orderStatus.textContent;
   }

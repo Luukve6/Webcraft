@@ -1,7 +1,7 @@
 {
   "name": "webcraft",
-  "version": "1.1.0",
-  "description": "Webcraft: eigen, zelfstandig websitebeheer (/admin) voor statische websites. Opslag als commits in GitHub.",
+  "version": "1.2.0",
+  "description": "Webcraft: eigen, zelfstandig websitebeheer (/admin) voor statische websites met Cloudflare Access en KV-opslag.",
   "private": true,
   "type": "module",
   "engines": {

@@ -1,6 +1,7 @@
 // Overzicht (dashboard): welkom, tellers, snelle acties, recente wijzigingen.
 
-import { h, icon, timeAgo, statusBadge, fill } from '../ui.js';
+import { h, icon, timeAgo, statusBadge, fill, confirmDialog, toast } from '../ui.js';
+import { api } from '../local.js';
 import { STATES } from '../publish.js';
 
 export function dashboardView(ctx) {
@@ -12,7 +13,8 @@ export function dashboardView(ctx) {
   const stat = (n, label, href) => h('a', { class: 'stat', href }, h('span', { class: 'stat-n' }, String(n)), h('span', { class: 'stat-l' }, label));
 
   const commitsList = h('ul', { class: 'activity' }, h('li', { class: 'muted' }, 'Laden…'));
-  client.listCommits(8).then((commits) => {
+  if (ctx.config.cloudMode) loadHistory(ctx, commitsList);
+  else client.listCommits(8).then((commits) => {
     fill(commitsList, ...commits.map((c) =>
       h('li', {},
         h('span', { class: 'activity-msg' }, c.commit.message.split('\n')[0]),
@@ -27,7 +29,9 @@ export function dashboardView(ctx) {
     fill(pubBox, 
       h('p', {}, h('span', { class: `dot dot-${st.cls}` }), ' ', h('strong', {}, st.label)),
       run && run.html_url && run.html_url !== '#' ? h('p', { class: 'small' }, h('a', { href: run.html_url, target: '_blank', rel: 'noopener' }, 'Details bekijken op GitHub')) : null,
-      publisher.hosting === 'local'
+      publisher.hosting === 'kv'
+        ? h('p', { class: 'small muted' }, 'Wat je opslaat, staat meteen online: de website haalt de inhoud direct uit Cloudflare.')
+        : publisher.hosting === 'local'
         ? h('p', { class: 'small muted' }, 'Je werkt op je eigen pc. Wijzigingen komen in de bestanden op deze computer (map content/) en staan pas online als je ze naar GitHub zet.')
         : publisher.hosting === 'cloudflare'
         ? h('p', { class: 'small muted' }, 'De website staat op Cloudflare Pages. Na elke opslag zet Cloudflare de nieuwe versie binnen een paar minuten online.')
@@ -88,4 +92,33 @@ export function dashboardView(ctx) {
       h('section', { class: 'card card-span' }, h('h2', {}, 'Recente wijzigingen'), commitsList)),
   );
   return { el, destroy: () => publisher.removeEventListener('change', renderPub) };
+}
+
+/** Cloudflare: de laatste versies uit de opslag, met "Terugzetten". */
+async function loadHistory(ctx, list) {
+  let items;
+  try {
+    items = await api(ctx.config, 'geschiedenis');
+  } catch (e) {
+    fill(list, h('li', { class: 'muted' }, 'Kon de versies niet laden: ' + e.message));
+    return;
+  }
+  if (!items.length || !items[0].tijd) { fill(list, h('li', { class: 'muted' }, 'Nog geen wijzigingen.')); return; }
+  fill(list, ...items.map((v) => h('li', { class: 'history-item' },
+    h('span', { class: 'activity-msg' }, v.huidig ? h('strong', {}, 'Huidige versie') : (v.wat || `Versie ${v.versie}`)),
+    h('span', { class: 'muted small' }, `${v.email || 'onbekend'} · ${timeAgo(v.tijd)}`),
+    v.huidig ? null : h('button', { type: 'button', class: 'btn btn-small', onclick: () => restore(ctx, v) }, 'Terugzetten'))));
+}
+
+async function restore(ctx, v) {
+  const wanneer = new Date(v.tijd).toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' });
+  const ok = await confirmDialog('Versie terugzetten?', `De inhoud van ${wanneer} (${v.email || 'onbekend'}) komt terug op de website. De huidige versie blijft bewaard in de lijst, dus dit kun je weer ongedaan maken. Foto's en pdf's blijven zoals ze nu zijn.`, 'Terugzetten');
+  if (!ok) return;
+  try {
+    await api(ctx.config, `geschiedenis/${v.nummer}/terugzetten`, { method: 'POST', body: {} });
+    toast('Teruggezet. De website toont deze versie meteen.', 'success');
+    setTimeout(() => location.reload(), 800); // alles opnieuw laden met de teruggezette inhoud
+  } catch (e) {
+    toast('Terugzetten mislukt: ' + e.message, 'error', 10000);
+  }
 }

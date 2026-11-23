@@ -65,7 +65,7 @@ export function collectionListView(ctx, name) {
   function showOrderState(state, err) {
     if (state === 'pending') orderStatus.textContent = 'Nieuwe volgorde wordt over een paar seconden opgeslagen… Je kunt gewoon verder schuiven.';
     else if (state === 'saving') orderStatus.textContent = 'Bezig met opslaan…';
-    else if (state === 'saved') { orderStatus.textContent = ''; toast('Nieuwe volgorde opgeslagen. De website wordt bijgewerkt.', 'success'); }
+    else if (state === 'saved') { orderStatus.textContent = ''; toast(`Nieuwe volgorde opgeslagen. ${ctx.liveNote}`, 'success'); }
     else if (state === 'error') { orderStatus.textContent = ''; toast('Volgorde opslaan mislukt: ' + err.message, 'error', 10000); render(); }
     orderStatus.hidden = !orderStatus.textContent;
   }
@@ -255,7 +255,7 @@ export function collectionEditView(ctx, name, id) {
       snapshot = stateKey();
       dirty = false;
       if (!isFile) heading.textContent = entryTitle(col, entry.data, entry.id); // nieuwe naam meteen bovenaan
-      toast(isFile ? `${col.label} opgeslagen. De website wordt bijgewerkt.` : `"${entryTitle(col, entry.data, entry.id)}" is opgeslagen. De website wordt bijgewerkt.`, 'success');
+      toast(isFile ? `${col.label} opgeslagen. ${ctx.liveNote}` : `"${entryTitle(col, entry.data, entry.id)}" is opgeslagen. ${ctx.liveNote}`, 'success');
       if (!isFile && !id) { ctx.navigate(`#/c/${name}/edit/${encodeURIComponent(entry.id)}`, { replace: true, force: true }); return; }
     } catch (e) {
       if (e instanceof ConflictError) {

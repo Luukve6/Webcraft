@@ -1,18 +1,11 @@
 {
-  "siteName": "Restaurant De Linde",
+  "siteName": "Voorbeeldrestaurant",
   "logo": "../favicon.svg",
   "logoFull": true,
-  "repo": {
-    "owner": "jouw-github-naam",
-    "name": "jouw-website",
-    "branch": "main"
-  },
-  "auth": {
-    "oauthUrl": ""
-  },
-  "apiBase": "https://api.github.com",
   "siteUrl": "https://www.example.nl",
-  "hosting": "cloudflare",
+  "storage": {
+    "api": "/admin/api"
+  },
   "features": {
     "pages": true,
     "posts": false,

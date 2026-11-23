@@ -12,6 +12,7 @@ export const STATES = {
   noPages: { label: 'Opgeslagen · publicatie staat uit', cls: 'warn' },
   handedOff: { label: 'Opgeslagen · Cloudflare zet het online', cls: 'ok' },
   local: { label: 'Opgeslagen op deze pc', cls: 'ok' },
+  kv: { label: 'Opgeslagen · staat meteen online', cls: 'ok' },
 };
 
 export class PublishTracker extends EventTarget {
@@ -44,14 +45,14 @@ export class PublishTracker extends EventTarget {
     this.stop();
     this.commitSha = commitSha;
     this.started = Date.now();
-    if (this.hosting === 'local') { this.set('local', null); return; }
+    if (this.hosting === 'local' || this.hosting === 'kv') { this.set(this.hosting, null); return; }
     this.set('waiting', null);
     this.poll();
   }
 
   /** Bij het opstarten: toon de status van de meest recente publicatie. */
   async checkLatest(commitSha) {
-    if (this.hosting === 'local') { this.set('idle', null); return; }
+    if (this.hosting === 'local' || this.hosting === 'kv') { this.set('idle', null); return; }
     try {
       const runs = await this.client.listWorkflowRuns({ headSha: commitSha, perPage: 5 });
       const run = pickRun(runs);
