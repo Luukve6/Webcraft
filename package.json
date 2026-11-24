@@ -1,6 +1,6 @@
 {
   "name": "webcraft",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Webcraft: eigen, zelfstandig websitebeheer (/admin) voor statische websites met Cloudflare Access en KV-opslag.",
   "private": true,
   "type": "module",
