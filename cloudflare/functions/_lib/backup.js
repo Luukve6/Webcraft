@@ -2,7 +2,7 @@
 // de inhoudsgegevens van de gekoppelde KV-namespace; gebruikers, Access-configuratie
 // en andere Cloudflare-instellingen horen bewust niet in een websiteback-up thuis.
 
-import { leesAlles } from './opslag.js';
+import { leesAlles, padToegestaan } from './opslag.js';
 import { bouwSite } from './site.js';
 
 const enc = new TextEncoder();
@@ -58,7 +58,7 @@ export async function maakBackup(env) {
     includes: ['huidige bewerkbare inhoud', 'media', 'gegenereerde bezoekersinhoud', 'tekstversiegeschiedenis'],
     excludes: ['gebruikers en rollen', 'Cloudflare Access-instellingen', 'tokens, wachtwoorden, sleutels en overige geheimen'], missing,
     current: cleanVersion({ ...current, bestanden: undefined }), checksums,
-    restore: { supported: false, reason: 'Herstellen wordt pas beschikbaar nadat deze export in een afzonderlijke testomgeving is gevalideerd.' },
+    restore: { supported: true, safeguards: ['controle van websitekoppeling', 'SHA-256-controlesommen', 'automatisch herstelpunt vóór vervanging'] },
   };
   add('manifest.json', enc.encode(JSON.stringify(manifest, null, 2) + '\n'));
   add('LEESMIJ.txt', enc.encode(['Webcraft websitegegevens-back-up', '', 'Open manifest.json voor de volledige inhoud, controlesommen en ontbrekende onderdelen.', 'data/current bevat de huidige bewerkbare inhoud en media onder hun oorspronkelijke paden.', 'data/history bevat eerdere tekstversies. E-mailadressen van bewerkers zijn bewust niet opgenomen.', 'generated bevat de afgeleide gegevens die de website nu gebruikt.', '', 'Deze export bevat GEEN Cloudflare Access, gebruikers, tokens, wachtwoorden of sleutels.', 'Deze export bevat nog niet de vaste Pages-deployment (HTML/CSS/JS). Bewaar daarvoor ook het deployment-archief of de bronmap.', 'De status is daarom gedeeltelijk, niet volledig.'].join('\n') + '\n'));
@@ -100,7 +100,9 @@ export async function controleerHerstel(env, body) {
     if (!entry || entry.sha256 !== await digest(raw)) throw Object.assign(new Error(`Controle mislukt voor ${zipPath}. De back-up is beschadigd of aangepast.`), { status: 400 });
     if (zipPath.startsWith('data/current/')) {
       const path = decodeURIComponent(zipPath.slice('data/current/'.length));
-      if (!path.startsWith('content/') && !/^public\/assets\/(docs|img\/fotos)\//.test(path)) throw Object.assign(new Error(`Onverwacht bestand in de back-up: ${path}`), { status: 400 });
+      // Gebruik exact dezelfde, site-specifieke toegangscontrole als bij opslaan.
+      // Daardoor worden media en documenten hersteld, zonder dat codebestanden toegelaten worden.
+      if (!padToegestaan(path)) throw Object.assign(new Error(`Onverwacht bestand in de back-up: ${path}`), { status: 400 });
       out[path] = base64;
     } else if (zipPath.startsWith('data/history/')) {
       const [, , number, ...rest] = zipPath.split('/'); const item = history.get(number) || { bestanden: {} }; history.set(number, item);

@@ -151,6 +151,7 @@ function navItems(config, user) {
     f.posts ? ['#/posts', 'Berichten', 'post'] : null,
     f.media ? ['#/media', 'Foto’s', 'image'] : null,
     config.cloudMode && user && user.role === 'admin' ? ['#/users', 'Gebruikers', 'users'] : null,
+    config.cloudMode && user && user.role === 'admin' ? ['#/settings/backups', 'Back-ups', 'settings'] : null,
     ['#/help', 'Hulp', 'help'],
   ].filter(Boolean);
 }

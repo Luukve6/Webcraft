@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { maakBackup, zipStream } from '../cloudflare/functions/_lib/backup.js';
+import { controleerHerstel, maakBackup, zipStream } from '../cloudflare/functions/_lib/backup.js';
 import { onRequest } from '../cloudflare/functions/admin/api/[[route]].js';
 
 function envForBackup(extra = {}) {
@@ -34,6 +34,25 @@ test('backup bevat inhoud, media, geschiedenis en controlesommen zonder gebruike
 
 test('backup vereist een vaste site-identiteit', async () => {
   await assert.rejects(maakBackup(envForBackup({ WEBCRAFT_SITE_ID: '' })), (error) => error.status === 503);
+});
+
+test('herstelcontrole accepteert toegestane media, maar geen codebestanden', async () => {
+  const env = envForBackup();
+  await env.WEBCRAFT_DATA.put('files', JSON.stringify({ versie: 1, bestanden: {
+    'content/home.json': b64('{"title":"Hallo"}'),
+    'public/assets/docs/menu.pdf': b64('%PDF test'),
+  } }));
+  const backup = await maakBackup(env);
+  const archief = Object.fromEntries(backup.entries
+    .filter((entry) => entry.path.startsWith('data/current/'))
+    .map((entry) => [entry.path, b64(entry.bytes)]));
+  const gecontroleerd = await controleerHerstel(env, { manifest: backup.manifest, archief });
+  assert.equal(gecontroleerd.bestanden['public/assets/docs/menu.pdf'], b64('%PDF test'));
+
+  const kwaadaardig = { ...archief, 'data/current/admin/js/app.js': b64('alert(1)') };
+  const code = Buffer.from('alert(1)');
+  backup.manifest.checksums['data/current/admin/js/app.js'] = { sha256: [...new Uint8Array(await crypto.subtle.digest('SHA-256', code))].map((b) => b.toString(16).padStart(2, '0')).join(''), bytes: code.length, required: true };
+  await assert.rejects(controleerHerstel(env, { manifest: backup.manifest, archief: kwaadaardig }), (error) => error.status === 400 && /Onverwacht bestand/.test(error.message));
 });
 
 test('backup API is uitsluitend voor admins en levert een ZIP', async () => {
