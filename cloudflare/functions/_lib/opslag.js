@@ -1,6 +1,6 @@
 // Opslag in Cloudflare KV (binding WEBCRAFT_DATA). Sleutels:
 //   files      { versie, tijd, email, bestanden: { pad: base64 } }  alles wat het beheer bewerkt
-//   history    de laatste 10 versies (alleen tekstbestanden; foto's en pdf's niet)
+//   history    de laatste 50 versies (alleen tekstbestanden; foto's en pdf's niet)
 //   users      [{ email, rol: "admin" | "editor" }]
 //   inhoud.js  de gebouwde inhoud voor de website (site.js bepaalt wat dat is)
 //   site       kleine gegevens voor de website (nieuwe pagina's, naam/adres)
@@ -8,7 +8,7 @@
 
 import { SITE_DIR, bouwSite } from './site.js';
 
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 50;
 const MAX_BYTES = 15 * 1024 * 1024;
 
 export class HttpError extends Error {
@@ -84,6 +84,24 @@ export async function schrijf(env, body, email) {
   for (const p of verwijder) delete bestanden[p];
   const n = Object.keys(nieuw).length + verwijder.length;
   return bewaar(env, cur, bestanden, email, `${n} ${n === 1 ? 'bestand' : 'bestanden'} aangepast`);
+}
+
+/** Herstel één volledig gevalideerde inhoudsstand. Eerst bewaren we altijd een volledig herstelpunt. */
+export async function herstelBestanden(env, bestanden, geschiedenis, email) {
+  const cur = await leesAlles(env);
+  const id = `restore:${new Date().toISOString().replace(/[:.]/g, '-')}`;
+  await kv(env).put(id, JSON.stringify(cur));
+  try {
+    const versie = await bewaar(env, cur, bestanden, email, 'Back-up hersteld');
+    // De importgeschiedenis hoort bij de herstelde inhoud. Het volledige oude
+    // herstelpunt staat los opgeslagen en blijft dus ook na deze vervanging beschikbaar.
+    await kv(env).put('history', JSON.stringify(geschiedenis));
+    return { versie, herstelpunt: id };
+  } catch (error) {
+    // Alleen na een fout proberen we de bekende, volledige vorige stand terug te zetten.
+    try { await bewaar(env, await leesAlles(env), cur.bestanden, email, 'Automatisch teruggedraaid na mislukt herstel'); } catch { /* herstelpunt blijft beschikbaar */ }
+    throw error;
+  }
 }
 
 /** Overzicht van de geschiedenis (zonder de bestanden zelf). Nummer 0 = de huidige versie. */

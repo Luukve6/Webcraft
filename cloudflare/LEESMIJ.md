@@ -6,6 +6,7 @@ Met deze opslag heeft een site geen GitHub nodig:
 - **Opslaan** gaat direct naar **Cloudflare KV**. De website haalt de inhoud daar live uit, dus het staat meteen online.
 - **Versies**: de laatste 10 versies staan op het Overzicht en zijn met één klik terug te zetten.
 - **Gebruikers**: een admin voegt in het beheer collega's toe als *admin* of *redacteur*. De allereerste persoon die inlogt, wordt automatisch admin.
+- **Back-ups**: alleen admins kunnen de bewerkbare inhoud, media en tekstversies als inspecteerbare ZIP downloaden. Stel per site ook een unieke `WEBCRAFT_SITE_ID` in. Access, gebruikers en geheimen worden nooit geëxporteerd.
 
 ## Bestanden
 
@@ -35,7 +36,7 @@ Kopieer `cloudflare/functions/` naar de hoofdmap van de repository van de site e
    - inlogmethode *One-time PIN*;
    - policy: *Allow*, de e-mailadressen van de beheerders.
 
-   Neem de *Application Audience (AUD) Tag* en je teamdomein (`<team>.cloudflareaccess.com`) over in `wrangler.toml`. Daarna opnieuw `npx wrangler pages deploy`.
+   Neem de *Application Audience (AUD) Tag* en je teamdomein (`<team>.cloudflareaccess.com`) over in `wrangler.toml`. Voeg daarnaast een blijvende, unieke `WEBCRAFT_SITE_ID` toe (bijv. een willekeurige UUID zonder persoonsgegevens). Daarna opnieuw `npx wrangler pages deploy`.
 6. Inhoud overzetten. Maak eerst een JSON met `{ versie: 1, tijd, email, wat, bestanden: { pad: base64 } }`
    (bijv. met een klein script in de repository van de site), dan:
    `npx wrangler kv key put files --path <bestand>.json --binding WEBCRAFT_DATA --remote`
@@ -61,3 +62,17 @@ npx wrangler pages dev --binding DEV_EMAIL=jij@voorbeeld.nl
 - **Geschiedenis:** maar 10 versies (alleen tekst; foto's en pdf's niet), in plaats van alles in git.
 - **Code bijwerken** (ontwerp of nieuwe Webcraft-versie): met `npx wrangler pages deploy`, niet via een commit.
 - **Snelheid:** KV is wereldwijd binnen ongeveer een minuut bijgewerkt. Dichtbij (zelfde land) meestal meteen. Bezoekers krijgen de inhoud maximaal 30 seconden uit de cache.
+
+## Herstellen als Webcraft of Cloudflare niet beschikbaar is
+
+Een ZIP uit **Back-ups** is een gewone ZIP: `manifest.json` beschrijft de inhoud en SHA-256-controlesommen, en `data/current/` bevat de actuele JSON, foto's en documenten onder hun oorspronkelijke paden. Bewaar de ZIP daarom ook buiten Cloudflare, bijvoorbeeld in twee versleutelde opslaglocaties.
+
+De huidige export is bewust gemarkeerd als *gedeeltelijk*: Pages Functions kunnen de vaste deploymentbundle niet veilig uitlezen. Bewaar daarom naast iedere data-export ook de gebruikte sitebronmap of een deployment-archief. Met die twee onderdelen kan een ontwikkelaar de site op elke gewone webhost opnieuw plaatsen; de content uit `data/current/` kan dan opnieuw in een Webcraft-KV-namespace worden geladen. Gebruikers en Access-regels moeten apart opnieuw worden ingesteld, omdat die nooit in een websiteback-up horen.
+
+De ingebouwde download begrenst de websitegegevens op 40 MB, zodat de Pages Function binnen de geheugenlimiet betrouwbaar kan blijven werken. Voor grotere sites is de veilige aanvullende methode een beheerde exporttaak met een Cloudflare R2-backupbucket: schrijf daarbij de ZIP als stream naar een object met beperkte, tijdelijke downloadtoegang. Voeg die bucket pas toe wanneer een site deze grens daadwerkelijk bereikt; hij is voor normale Webcraft-sites niet nodig.
+
+## Herstellen als Webcraft of Cloudflare niet beschikbaar is
+
+Een ZIP uit **Back-ups** is een gewone ZIP: `manifest.json` beschrijft de inhoud en SHA-256-controlesommen, en `data/current/` bevat de actuele JSON, foto's en documenten onder hun oorspronkelijke paden. Bewaar de ZIP daarom ook buiten Cloudflare, bijvoorbeeld in twee versleutelde opslaglocaties.
+
+De huidige export is bewust gemarkeerd als *gedeeltelijk*: Pages Functions kunnen de vaste deploymentbundle niet veilig uitlezen. Bewaar daarom naast iedere data-export ook de gebruikte sitebronmap of een deployment-archief. Met die twee onderdelen kan een ontwikkelaar de site op elke gewone webhost opnieuw plaatsen; de content uit `data/current/` kan dan opnieuw in een Webcraft-KV-namespace worden geladen. Gebruikers en Access-regels moeten apart opnieuw worden ingesteld, omdat die nooit in een websiteback-up horen.

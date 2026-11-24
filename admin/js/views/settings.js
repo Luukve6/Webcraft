@@ -136,7 +136,8 @@ export function settingsView(ctx) {
   h('div', { class: 'btn-row' }, saveBtn, unsaved));
 
   return {
-    el: h('div', { class: 'view' }, h('div', { class: 'view-header' }, h('h1', {}, 'Algemeen')), form),
+    el: h('div', { class: 'view' }, h('div', { class: 'view-header' }, h('h1', {}, 'Algemeen')), form,
+      ctx.config.cloudMode && ctx.user.role === 'admin' ? h('section', { class: 'card form' }, h('h2', {}, 'Back-ups'), h('p', {}, 'Download een kopie van uw websitegegevens.'), h('a', { class: 'btn', href: '#/settings/backups' }, 'Back-ups openen')) : null),
     canLeave: () => !dirty,
   };
 }

@@ -12,6 +12,7 @@ import { listView } from './views/list.js';
 import { editView } from './views/edit.js';
 import { mediaView } from './views/media.js';
 import { settingsView } from './views/settings.js';
+import { backupView } from './views/backup.js';
 import { helpView } from './views/help.js';
 import { collectionListView, collectionEditView } from './views/collection.js';
 import { normalizeCollections } from './lib/schema.js';
@@ -45,7 +46,7 @@ async function loadConfig() {
 function showFatal(message) {
   clear(app).append(h('div', { class: 'login-screen' }, h('main', { class: 'login-card' },
     h('h1', {}, 'Er ging iets mis'), h('p', {}, message),
-    h('button', { class: 'btn btn-primary', onclick: () => location.reload() }, 'Opnieuw proberen'))));
+    h('a', { class: 'btn btn-primary', href: '/admin/' }, 'Terug naar inloggen'))));
 }
 
 async function start() {
@@ -335,6 +336,7 @@ class Shell {
       else view = listView(this.ctx, section);
       document.title = section === 'pages' ? 'Pagina’s' : 'Berichten';
     } else if (section === 'media' && f.media) { active = '#/media'; view = mediaView(this.ctx); document.title = 'Foto’s'; }
+    else if (section === 'settings' && action === 'backups' && f.settings && this.ctx.config.cloudMode && this.ctx.user.role === 'admin') { active = '#/settings'; view = backupView(this.ctx); document.title = 'Back-ups'; }
     else if (section === 'settings' && f.settings) { active = '#/settings'; view = settingsView(this.ctx); document.title = 'Algemeen'; }
     else if (section === 'users' && this.ctx.config.cloudMode && this.ctx.user.role === 'admin') { active = '#/users'; view = usersView(this.ctx); document.title = 'Gebruikers'; }
     else if (section === 'help') { active = '#/help'; view = helpView(this.ctx); document.title = 'Hulp'; }
