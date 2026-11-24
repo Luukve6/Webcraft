@@ -63,11 +63,13 @@ npx wrangler pages dev --binding DEV_EMAIL=jij@voorbeeld.nl
 - **Code bijwerken** (ontwerp of nieuwe Webcraft-versie): met `npx wrangler pages deploy`, niet via een commit.
 - **Snelheid:** KV is wereldwijd binnen ongeveer een minuut bijgewerkt. Dichtbij (zelfde land) meestal meteen. Bezoekers krijgen de inhoud maximaal 30 seconden uit de cache.
 
-## Herstellen als Webcraft of Cloudflare niet beschikbaar is
+## Deployment-archief
 
-Een ZIP uit **Back-ups** is een gewone ZIP: `manifest.json` beschrijft de inhoud en SHA-256-controlesommen, en `data/current/` bevat de actuele JSON, foto's en documenten onder hun oorspronkelijke paden. Bewaar de ZIP daarom ook buiten Cloudflare, bijvoorbeeld in twee versleutelde opslaglocaties.
+Maak direct vóór iedere Pages-deployment ook een archief van de vaste HTML-, CSS- en JavaScriptbestanden. Op Windows:
 
-De huidige export is bewust gemarkeerd als *gedeeltelijk*: Pages Functions kunnen de vaste deploymentbundle niet veilig uitlezen. Bewaar daarom naast iedere data-export ook de gebruikte sitebronmap of een deployment-archief. Met die twee onderdelen kan een ontwikkelaar de site op elke gewone webhost opnieuw plaatsen; de content uit `data/current/` kan dan opnieuw in een Webcraft-KV-namespace worden geladen. Gebruikers en Access-regels moeten apart opnieuw worden ingesteld, omdat die nooit in een websiteback-up horen.
+`powershell -ExecutionPolicy Bypass -File scripts/maak-deployment-archief.ps1 -WebsiteMap <de-map-die-je-deployt> -UitvoerMap <veilige-backupmap>`
+
+Bewaar dit ZIP-bestand naast de gegevens-ZIP uit het beheer. Samen vormen ze een volledige herstelset: de gegevens-ZIP herstelt inhoud, media en historie; het deployment-archief herstelt de vaste sitecode.
 
 De ingebouwde download begrenst de websitegegevens op 40 MB, zodat de Pages Function binnen de geheugenlimiet betrouwbaar kan blijven werken. Voor grotere sites is de veilige aanvullende methode een beheerde exporttaak met een Cloudflare R2-backupbucket: schrijf daarbij de ZIP als stream naar een object met beperkte, tijdelijke downloadtoegang. Voeg die bucket pas toe wanneer een site deze grens daadwerkelijk bereikt; hij is voor normale Webcraft-sites niet nodig.
 
