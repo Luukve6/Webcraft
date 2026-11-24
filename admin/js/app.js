@@ -1,7 +1,7 @@
 // Startpunt van de beheeromgeving: inloggen, menu, navigatie (router).
 
 import { h, clear, icon, toast, confirmDialog, fill, closeModals, WEBCRAFT_URL } from './ui.js';
-import { VERSION } from './version.js';
+import { VERSION } from './version.js?v=20261124-4';
 import { GitHubClient } from './lib/github.js';
 import { loadSession, saveSession, clearSession } from './auth.js';
 import { Store } from './store.js';
