@@ -13,7 +13,7 @@ import { editView } from './views/edit.js';
 import { mediaView } from './views/media.js';
 import { settingsView } from './views/settings.js';
 import { backupView } from './views/backup.js';
-import { helpView } from './views/help.js';
+import { helpView } from './views/help.js?v=20261124-3';
 import { collectionListView, collectionEditView } from './views/collection.js';
 import { normalizeCollections } from './lib/schema.js';
 import { pagePath } from './lib/paths.js';
